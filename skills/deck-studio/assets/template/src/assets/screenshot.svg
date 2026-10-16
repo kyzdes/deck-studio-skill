@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <rect width="1280" height="760" fill="#0f1017"/>
+  <rect x="0" y="0" width="64" height="760" fill="#14151d"/>
+  <g fill="#2a2c38"><rect x="18" y="24" width="28" height="28" rx="7"/><rect x="18" y="72" width="28" height="28" rx="7"/><rect x="18" y="120" width="28" height="28" rx="7"/><rect x="18" y="168" width="28" height="28" rx="7"/></g>
+  <rect x="64" y="0" width="1216" height="44" fill="#12131a"/>
+  <rect x="580" y="14" width="120" height="16" rx="8" fill="#262833"/>
+  <circle cx="672" cy="210" r="34" fill="none" stroke="#e8875f" stroke-width="4"/>
+  <rect x="520" y="270" width="304" height="22" rx="11" fill="#f1eee8" opacity=".85"/>
+  <rect x="470" y="310" width="404" height="12" rx="6" fill="#6b6d78"/>
+  <rect x="510" y="332" width="324" height="12" rx="6" fill="#6b6d78"/>
+  <g fill="none" stroke="#2c2e3a" stroke-width="2"><rect x="482" y="372" width="380" height="40" rx="10"/><rect x="482" y="424" width="380" height="40" rx="10"/><rect x="482" y="476" width="380" height="40" rx="10"/></g>
+  <g fill="#3a3c48"><rect x="500" y="388" width="220" height="8" rx="4"/><rect x="500" y="440" width="180" height="8" rx="4"/><rect x="500" y="492" width="240" height="8" rx="4"/></g>
+  <rect x="320" y="640" width="704" height="84" rx="18" fill="#14151d" stroke="#2c2e3a" stroke-width="2"/>
+  <rect x="344" y="662" width="200" height="12" rx="6" fill="#4a4c58"/>
+  <circle cx="990" cy="700" r="16" fill="#e8875f" opacity=".7"/>
+  <text x="640" y="600" fill="#5b5d68" font-family="sans-serif" font-size="18" text-anchor="middle">Скриншот-заглушка: положите свой файл в src/assets/ и поменяйте src</text>
+</svg>

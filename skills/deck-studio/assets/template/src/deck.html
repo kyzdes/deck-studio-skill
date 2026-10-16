@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Название презентации</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="engine.css">
+<style>
+/* Правки под конкретную деку: токены темы (references/themes.md) и разовые позиции.
+   Пример: :root { --accent: #5aa9ff; } */
+</style>
+</head>
+<body>
+
+<script>
+/* ======================================================================
+   НАСТРОЙКИ И ДАННЫЕ — правьте здесь.
+   null = на слайде пунктирная заглушка. Числа пишите без кавычек.
+   ====================================================================== */
+window.DECK_CONFIG = { minutes: 20, locale: 'ru-RU' };   // таймер в окне заметок (N) и формат чисел
+
+window.DECK_DATA = {
+  speaker: 'Имя Фамилия',
+  role: 'Роль',
+  // демо-значения каталога — замените своими
+  people: 810,
+  visits: 2618,
+  nps: 80,
+  csat: 94,
+  roti: 89,
+  share: 35,             // «X из 100» на слайде с точками
+  ratingsTop: 27,        // сетка оценок: сколько «10»
+  ratingsNext: 5,        // сколько «9»
+  avg: '9,8',
+  quoteAuthor: 'Имя руководителя',
+  missingDemo: null      // так выглядит незаполненная цифра
+};
+
+/* Свои фигуры из частиц: точки [x, y, z, цвет] вокруг (0,0,0), цвет 0 текст · 1 крупный акцент · 2 приглушённый · 3 акцент.
+   Помощники h.seg / h.loop / h.resample / h.arc — см. references/particles.md. Ставятся через data-fx="shape@имя,x,y,масштаб"
+   или в колонку через data-fx="icons@имя,…". */
+window.DECK_SHAPES = {
+  rocket: {
+    build: h => {
+      const body = h.resample([[0, -92], [18, -62], [24, -20], [24, 40], [42, 64], [24, 58], [14, 70], [-14, 70], [-24, 58], [-42, 64], [-24, 40], [-24, -20], [-18, -62]], 260, 0, true);
+      const port = h.resample(h.arc(0, -22, 11, 0, Math.PI * 2, 30), 40, 3, true);
+      const flame = h.resample([[-12, 76], [-5, 92], [0, 112], [5, 92], [12, 76]], 50, 3);
+      return [...body, ...port, ...flame];
+    },
+    opt: { rot: .35, osc: .5, tilt: .1 }
+  }
+};
+</script>
+
+<canvas id="fx"></canvas>
+<div id="glow"></div>
+
+<div class="stage" id="stage">
+  <div class="chrome">
+    <div class="act" id="act"></div>
+    <div class="count" id="count"></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+
+  <!-- 1 · Крючок -->
+  <section class="slide" data-fx="sphere" data-act="Пролог" data-time="0:30">
+    <div class="pad">
+      <div class="kicker up" style="--d:.2s">Рубрика — вопрос зала</div>
+      <h1 class="t t-xl" data-a="words" data-d=".35" style="max-width:1180px;margin-top:120px;font-size:118px"><em>Крючок</em> — одна мысль на всю презентацию</h1>
+    </div>
+    <div class="who up" style="--d:1.5s"><span class="name" data-f="speaker"></span><span class="role" data-f="role"></span></div>
+    <aside class="notes"><p>Макет «Крючок»: заголовок-тезис всей деки, справа вращается сфера. Финальный слайд возвращается к этой же сфере.</p><p>Заголовок — утверждение, которое зал унесёт. Глагол важен: «написать» и «исполнить» — разные крючки.</p></aside>
+  </section>
+
+  <!-- 2 · Личный контекст -->
+  <section class="slide" data-fx="dive" data-act="01 · Контекст" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Откуда мой взгляд</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:880px">Личный контекст вместо регалий: <em>как я пришёл</em> к теме</h2>
+    </div>
+    <div class="rows story" style="left:1160px;top:240px;width:640px">
+      <div class="row up" style="--d:1.0s"><span class="k">2023</span><p>Первый шаг: где и с чего всё началось</p></div>
+      <div class="row up" style="--d:1.15s"><span class="k">Поворот</span><p>Что заставило копнуть глубже</p></div>
+      <div class="row up" style="--d:1.3s"><span class="k">Последние месяцы</span><p>Что делал руками и что перестроил</p></div>
+      <div class="row up" style="--d:1.45s"><span class="k">Вместе с</span><p>С какой командой работал</p></div>
+      <div class="row up" style="--d:1.6s"><span class="k">Сейчас</span><p>Где делюсь опытом — и почему вы слышите это от меня</p></div>
+    </div>
+    <aside class="notes"><p>Макет «Таймлайн-история». Поток частиц «ныряет» между заголовком и таймлайном.</p><p>Если зал знает спикера, не перечисляйте должности: расскажите путь. До пяти строк, метка сверху моноширинным.</p></aside>
+  </section>
+
+  <!-- 3 · Цифры -->
+  <section class="slide" data-fx="horizon" data-act="01 · Контекст" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">А это работает?</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:1500px">Главное число — в заголовке: <em><span data-f="people" data-ph="N"></span>&nbsp;человек</em>, NPS <span data-f="nps" data-ph="X" data-suffix="%"></span></h2>
+    </div>
+    <div class="tiles">
+      <div class="tile up" style="--d:1.0s"><b data-f="csat" data-ph="X" data-suffix="%" data-count></b><span class="lbl">CSAT</span><p>плитка — доказательство</p></div>
+      <div class="tile up" style="--d:1.12s"><b data-f="roti" data-ph="X" data-suffix="%" data-count></b><span class="lbl">ROTI</span><p>цифры досчитываются при показе</p></div>
+      <div class="tile up" style="--d:1.24s"><b data-f="missingDemo" data-ph="X" data-suffix="%" data-count></b><span class="lbl">Заглушка</span><p>null в DECK_DATA рисует пунктир</p></div>
+      <div class="tile up" style="--d:1.36s"><b data-f="visits" data-ph="N" data-count></b><span class="lbl">Посещения</span><p>подпись в одну-две строки</p></div>
+    </div>
+    <div class="abs period up" style="--d:1.6s">Подстрочник: откуда цифры · одна строка</div>
+    <aside class="notes"><p>Макет «Плитки цифр». Главное число — в заголовке, четыре плитки — доказательства. Числа берутся из DECK_DATA (data-f), с data-count досчитываются.</p></aside>
+  </section>
+
+  <!-- 4 · Оценки и цитаты -->
+  <section class="slide" data-fx="dust" data-act="01 · Контекст" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Что говорят участники</div>
+      <h2 class="t t-m" data-a="words" data-d=".3">Сетка оценок и <em>живые цитаты</em></h2>
+    </div>
+    <div class="votes" data-groups="10:@ratingsTop,9:@ratingsNext"></div>
+    <div class="abs votes-legend up" style="--d:1.9s"><span><i class="g0"></i><b data-f="ratingsTop"></b>× 10</span><span><i class="g1"></i><b data-f="ratingsNext"></b>× 9</span><span>средняя <b data-f="avg"></b></span></div>
+    <p class="abs votes-note up" style="--d:2.1s">Ниже девяти не поставил никто.</p>
+    <div class="quotes">
+      <figure class="qt up" style="--d:1.0s"><blockquote>«Цитата участника — дословно, только заглавные и ё»</blockquote><figcaption>Отзыв участника</figcaption></figure>
+      <figure class="qt up" style="--d:1.15s"><blockquote>«Вторая цитата, короче первой»</blockquote><figcaption>Вопрос анкеты</figcaption></figure>
+      <figure class="qt up" style="--d:1.3s"><blockquote>«Третья — про то, что человек будет делать»</blockquote><figcaption>Вопрос анкеты</figcaption></figure>
+      <figure class="qt up" style="--d:1.45s"><blockquote>«Четвёртая — самая короткая»</blockquote><figcaption>Вопрос анкеты</figcaption></figure>
+    </div>
+    <aside class="notes"><p>Макет «Оценки + цитаты». data-groups="метка:количество,…" — количество можно брать из DECK_DATA через @поле. Цитаты только дословные; негатив не берите.</p></aside>
+  </section>
+
+  <!-- 5 · Цитата -->
+  <section class="slide" data-fx="burst" data-act="02 · Зачем" data-time="0:45">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Что нас ждёт</div>
+    </div>
+    <blockquote class="quote" data-a="words" data-d=".35">«Цитата, которая задаёт задачу: <em>главные слова</em> выделены цветом»</blockquote>
+    <div class="by up" style="--d:1.9s">— <span data-f="quoteAuthor"></span></div>
+    <aside class="notes"><p>Макет «Большая цитата»: частицы расходятся лучами из центра. Цитату сверьте дословно и спросите, можно ли называть автора.</p></aside>
+  </section>
+
+  <!-- 6 · График-разрыв -->
+  <section class="slide" data-fx="lines" data-act="02 · Зачем" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Почему это не факультатив</div>
+      <h2 class="t t-l" data-a="words" data-d=".3" style="max-width:1500px">Одна линия растёт, другая стоит — <em>разрыв</em></h2>
+      <p class="lead up" style="--d:.9s;margin-top:22px">Подпись-вывод одной строкой: что из этого следует.</p>
+    </div>
+    <svg class="gapchart" viewBox="0 0 1920 1080" aria-hidden="true" data-labels="Объём задач|Люди|Разрыв|Сейчас|Через год"></svg>
+    <div class="gapchart-labels"></div>
+    <aside class="notes"><p>Макет «График-разрыв» без чисел: частицы текут по линиям графика. Подписи — в data-labels через «|»: верх, низ, разрыв, старт, финиш.</p></aside>
+  </section>
+
+  <!-- 7 · X из 100 -->
+  <section class="slide" data-fx="dust" data-act="02 · Зачем" data-time="1:00">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Где мы сейчас</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:840px">Сейчас так делают <em><span data-f="share" data-ph="X"></span> из 100</em> наших сотрудников</h2>
+    </div>
+    <div class="dots" data-lit="@share"></div>
+    <aside class="notes"><p>Макет «Сто точек»: data-lit — число или @поле. Источник цифры — в заметках, на слайд оговорки не вешайте, если о них не просили.</p></aside>
+  </section>
+
+  <!-- 8 · Две колонки с фигурами -->
+  <section class="slide" data-fx="icons@540,gear,bulb" data-act="03 · Как думать" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">На горизонте года</div>
+      <h2 class="t t-m" data-a="words" data-d=".3">Тему понимают по-разному, но можно выделить <em>два направления</em></h2>
+    </div>
+    <div class="dirs2">
+      <div class="tool up" style="--d:1.0s"><div class="tag">Направление 01</div><h3>Рутина</h3><p>Короткое пояснение в одну строку</p></div>
+      <div class="tool up" style="--d:1.15s"><div class="tag">Направление 02</div><h3>Сложные идеи</h3><p>Короткое пояснение в одну строку</p></div>
+    </div>
+    <p class="abs help-line up" style="--d:1.6s;top:930px">Итог одной строкой — <em>что это даёт каждому.</em></p>
+    <aside class="notes"><p>Макет «Колонки с фигурами»: data-fx="icons@y,имя,имя" ставит по фигуре над каждой колонкой. Встроенные: gear, bulb, planet, artboard, laptop, mlnet, tardis; свои — через DECK_SHAPES.</p></aside>
+  </section>
+
+  <!-- 9 · Рамка → TARDIS -->
+  <section class="slide" data-fx="box|tardis" data-act="03 · Как думать" data-time="1:30">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Как переключиться</div>
+      <h2 class="t t-m" data-a="words" data-d=".3">Обычный режим против нового — по клику рамка <em>становится больше внутри</em></h2>
+    </div>
+    <div class="modes">
+      <div class="mode up" style="--d:1.1s"><div class="lbl">Как обычно</div><p>Первый режим: привычная рамка.</p></div>
+      <div class="mode on up" data-step="1"><div class="lbl">Как теперь</div><p>Второй режим появляется по клику, частицы собираются в TARDIS.</p></div>
+    </div>
+    <aside class="notes"><p>Макет «Два режима» с шагом: data-fx="box|tardis" — формация на каждый шаг через «|». Отсылка: снаружи будка, внутри больше, чем снаружи.</p></aside>
+  </section>
+
+  <!-- 10 · Вопросы -->
+  <section class="slide" data-fx="dust" data-act="03 · Как думать" data-time="1:00">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">С чего начать</div>
+      <h2 class="t t-m" data-a="words" data-d=".3">Четыре карточки, которые <em>открываются по клику</em></h2>
+    </div>
+    <div class="qgrid">
+      <div class="qc up" style="--d:1.1s"><div class="lbl">Приём 01</div><p>«Первый вопрос виден сразу»</p></div>
+      <div class="qc up" data-step="1"><div class="lbl">Приём 02</div><p>«Второй — по клику»</p></div>
+      <div class="qc up" data-step="2"><div class="lbl">Приём 03</div><p>«Третий — по клику»</p></div>
+      <div class="qc up" data-step="3"><div class="lbl">Приём 04</div><p>«Четвёртый — по клику»</p></div>
+    </div>
+    <aside class="notes"><p>Макет «Карточки по клику»: data-step="1…" — порядок появления. В заметках помечайте [Клик], чтобы спикер не сбился.</p></aside>
+  </section>
+
+  <!-- 11 · Обзор инструментов -->
+  <section class="slide" data-fx="icons@planet,artboard,laptop,mlnet" data-act="04 · Инструменты" data-time="0:45">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Что у нас уже есть</div>
+      <h2 class="t t-m" data-a="words" data-d=".3">Четыре инструмента — <em>у каждого своя фигура</em></h2>
+    </div>
+    <div class="tools4">
+      <div class="tool up" style="--d:1.0s"><div class="tag">Когда задача большая</div><h3>Первый</h3><p>Одна строка — зачем он.</p><span class="get"><a class="lnk" href="https://example.com" target="_blank" rel="noopener">example.com</a></span></div>
+      <div class="tool up" style="--d:1.15s"><div class="tag">Когда нужно показать</div><h3>Второй</h3><p>Одна строка — зачем он.</p><span class="get">Где взять — одной строкой</span></div>
+      <div class="tool up" style="--d:1.3s"><div class="tag">Когда нужна цифра</div><h3>Третий</h3><p>Одна строка — зачем он.</p><span class="get">Self Service</span></div>
+      <div class="tool up" style="--d:1.45s"><div class="tag">Когда нужны данные</div><h3>Четвёртый</h3><p>Одна строка — зачем он.</p><span class="get">example.com</span></div>
+    </div>
+    <aside class="notes"><p>Макет «Обзор инструментов»: .tools4 на четыре колонки или .tools на три. Фигуры не повторяйте — у каждого своя. Строка «где взять» под каждым.</p></aside>
+  </section>
+
+  <!-- 12 · Факты об инструменте -->
+  <section class="slide" data-fx="planet" data-act="04 · Инструменты" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Первый · рубрика-роль</div>
+      <h2 class="t t-l" data-a="words" data-d=".3" style="max-width:1000px">Инструмент <em>делает главное</em> — и не тратит лишнего</h2>
+    </div>
+    <div class="facts4">
+      <div class="f4 up" style="--d:1.1s"><span class="lbl">Факт 01</span><p>Только то, что подтвердил человек</p></div>
+      <div class="f4 up" style="--d:1.22s"><span class="lbl">Факт 02</span><p>Без выдуманных возможностей</p></div>
+      <div class="f4 up" style="--d:1.34s"><span class="lbl">Факт 03</span><p>Короткая формулировка</p></div>
+      <div class="f4 up" style="--d:1.46s"><span class="lbl">Факт 04</span><p>Связь со сценарием зала</p></div>
+    </div>
+    <aside class="notes"><p>Макет «Четыре факта + планета». Факты — дословно со слов автора; сценарии примеров помечайте как примеры.</p></aside>
+  </section>
+
+  <!-- 13 · История по клику + макет -->
+  <section class="slide" data-fx="scatter|frame" data-act="04 · Инструменты" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Второй · когда нужно показать</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:860px">По клику частицы <em>собираются в макет</em></h2>
+    </div>
+    <div class="rows" style="left:120px;top:560px;width:840px">
+      <div class="row up" style="--d:1.1s"><span class="k">01</span><p>Ситуация зала</p></div>
+      <div class="row up" data-step="1"><span class="k">02</span><p>Что делаете с инструментом</p></div>
+      <div class="row up" data-step="1"><span class="k">03</span><p>Что получаете</p></div>
+    </div>
+    <div class="abs artboard fade" style="--d:.6s"></div>
+    <div class="abs prompt up" data-step="1"><b>›</b>описание словами: что собрать</div>
+    <div class="abs fact-line up" style="--d:1.5s;top:940px"><b>Что это</b>Одна строка факта.</div>
+    <aside class="notes"><p>Макет «История + макет»: data-fx="scatter|frame" — облако в рамке, по клику каркас интерфейса.</p></aside>
+  </section>
+
+  <!-- 14 · Терминал -->
+  <section class="slide" data-fx="dust" data-act="04 · Инструменты" data-time="1:15">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Третий · когда нужна цифра</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:820px">Команда <em>печатается сама</em>, ответ появляется следом</h2>
+      <p class="lead up" style="--d:1.0s;margin-top:34px;max-width:780px">Якорь для незнакомого: командная строка — окно, где задачу пишут словами.</p>
+    </div>
+    <div class="abs term up" style="--d:.7s">
+      <div class="bar"><i></i><i></i><i></i><span>инструмент · рабочий компьютер</span></div>
+      <div class="body">
+        <div class="in"><b>›</b><span data-type="Возьми выгрузку из папки «Данные» и посчитай три сценария"></span><span class="caret"></span></div>
+        <div class="out">
+          <div>Читаю файлы…</div>
+          <div>Считаю сценарии…</div>
+          <div>✓ Готово: «Оценка.xlsx»</div>
+        </div>
+      </div>
+      <div class="foot">Пример сценария</div>
+    </div>
+    <div class="abs fact-line up" style="--d:1.6s"><b>Правило</b>Неверная цифра звучит так же уверенно, как верная. Проверяйте глазами.</div>
+    <aside class="notes"><p>Макет «Терминал»: текст в data-type печатается при входе на слайд, строки .out появляются после. Помечайте «пример сценария».</p></aside>
+  </section>
+
+  <!-- 15 · Скриншот -->
+  <section class="slide" data-fx="horizon" data-act="04 · Инструменты" data-time="0:30">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Вживую</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:520px">Настоящий скриншот <em>в рамке окна</em></h2>
+    </div>
+    <ul class="shot-notes">
+      <li class="up" style="--d:1.1s">Подписи — с самого экрана</li>
+      <li class="up" style="--d:1.22s">Не больше трёх-четырёх</li>
+      <li class="up" style="--d:1.34s">Картинка встраивается в файл</li>
+    </ul>
+    <div class="abs shot-link up" style="--d:1.5s"><a class="lnk" href="https://example.com" target="_blank" rel="noopener">example.com</a></div>
+    <figure class="abs shot up" style="--d:.6s">
+      <div class="shot-bar"><i></i><i></i><i></i><span>example.com</span></div>
+      <img src="assets/screenshot.svg" alt="Скриншот-заглушка интерфейса">
+    </figure>
+    <aside class="notes"><p>Макет «Скриншот»: положите PNG в src/assets/ и поменяйте src. Широкий кадр — left:900px;width:900px, заголовок над всем.</p></aside>
+  </section>
+
+  <!-- 16 · Своя фигура -->
+  <section class="slide" data-fx="shape@rocket,1420,600,1.9" data-act="04 · Инструменты" data-time="0:30">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Своя фигура</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:820px">Любая фигура из частиц — <em>одной функцией</em> в DECK_SHAPES</h2>
+      <p class="lead up" style="--d:1.0s;margin-top:34px;max-width:760px">Контур задаётся точками, помощник resample раскладывает их равномерно — линии получаются чистыми.</p>
+    </div>
+    <aside class="notes"><p>Макет «Своя фигура»: data-fx="shape@rocket,x,y,масштаб". Рецепт — references/particles.md.</p></aside>
+  </section>
+
+  <!-- 17 · Четыре шага -->
+  <section class="slide" data-fx="speed" data-act="05 · Финал" data-time="0:45">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Как это собрать вместе</div>
+      <h2 class="t t-l" data-a="words" data-d=".3" style="max-width:1500px">Четыре шага — <em>поток разгоняется</em> к краю</h2>
+    </div>
+    <div class="steps4">
+      <div class="st up" style="--d:1.0s"><span class="n">01</span><h3>Набросать</h3><p>Глагол и одна строка</p><span class="tag">Инструмент</span></div>
+      <div class="st up" style="--d:1.15s"><span class="n">02</span><h3>Проверить</h3><p>Глагол и одна строка</p><span class="tag">Инструмент</span></div>
+      <div class="st up" style="--d:1.3s"><span class="n">03</span><h3>Показать</h3><p>Глагол и одна строка</p><span class="tag">Инструмент</span></div>
+      <div class="st up" style="--d:1.45s"><span class="n">04</span><h3>Посчитать</h3><p>Глагол и одна строка</p><span class="tag">Инструмент</span></div>
+    </div>
+    <p class="abs help-line up" style="--d:1.9s">Я рядом — <em>помогу запустить любой из инструментов.</em></p>
+    <aside class="notes"><p>Макет «Четыре шага» — сводка перед финалом.</p></aside>
+  </section>
+
+  <!-- 18 · Ссылки -->
+  <section class="slide" data-fx="horizon" data-act="05 · Финал" data-time="0:30">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Где взять</div>
+      <h2 class="t t-m" data-a="words" data-d=".3">Все ссылки <em>пришлю в чат</em> после выступления</h2>
+    </div>
+    <div class="links">
+      <div class="lk up" style="--d:1.0s"><span class="nm">Первый и второй</span><a class="url" href="https://example.com" target="_blank" rel="noopener">example.com</a></div>
+      <div class="lk up" style="--d:1.15s"><span class="nm">Четвёртый</span><a class="url" href="https://example.org" target="_blank" rel="noopener">example.org</a></div>
+      <div class="lk up" style="--d:1.3s"><span class="nm">Третий</span><span class="url">Self Service</span></div>
+    </div>
+    <aside class="notes"><p>Макет «Ссылки крупно». Текст для чата с теми же ссылками — в конце copy.md.</p></aside>
+  </section>
+
+  <!-- 19 · Дальше + CTA -->
+  <section class="slide" data-fx="dust" data-act="05 · Финал" data-time="1:00">
+    <div class="pad">
+      <div class="kicker up" style="--d:.15s">Что дальше</div>
+      <h2 class="t t-m" data-a="words" data-d=".3" style="max-width:1560px">Две вещи на год вперёд и <em>куда с ними идти</em></h2>
+    </div>
+    <div class="two">
+      <div class="tw up" style="--d:1.1s"><span class="n">01</span><h3>Первое</h3><p>Одна строка о том, что меняется</p></div>
+      <div class="tw up" style="--d:1.25s"><span class="n">02</span><h3>Второе</h3><p>Одна строка о том, что меняется</p></div>
+    </div>
+    <div class="abs cta up" style="--d:1.6s"><span class="who2">За этим — ко мне</span></div>
+    <aside class="notes"><p>Макет «Две колонки + CTA». В плашке без имени и контакта — зал знает, к кому идти.</p></aside>
+  </section>
+
+  <!-- 20 · Финал -->
+  <section class="slide" data-fx="sphere" data-act="05 · Финал" data-time="1:15">
+    <div class="pad">
+      <h2 class="t t-l" data-a="words" data-d=".3" style="max-width:1060px;margin-top:170px">Финал возвращает крючок — <em>и сферу с первого слайда</em></h2>
+    </div>
+    <div class="who up" style="--d:1.6s"><span class="name" data-f="speaker"></span><span class="where">Первый и второй — <a class="lnk" href="https://example.com" target="_blank" rel="noopener">example.com</a><br>Третий — из Self Service</span></div>
+    <aside class="notes"><p>Макет «Финал»: тот же формат, что у крючка, мелко — где взять инструменты (слайд висит дольше всех во время вопросов).</p></aside>
+  </section>
+</div>
+
+<div class="nav"><button id="prev" aria-label="Назад">‹</button><button id="next" aria-label="Вперёд">›</button></div>
+<div class="help" id="help">
+  <h4>Управление</h4>
+  <dl>
+    <dt>→ · пробел</dt><dd>дальше (сначала шаги на слайде)</dd>
+    <dt>←</dt><dd>назад</dd>
+    <dt>F</dt><dd>полный экран</dd>
+    <dt>N</dt><dd>окно заметок спикера с таймером</dd>
+    <dt>цифры + Enter</dt><dd>перейти к слайду</dd>
+    <dt>Home · End</dt><dd>первый · последний слайд</dd>
+    <dt>H · ?</dt><dd>эта подсказка</dd>
+  </dl>
+</div>
+
+<script src="engine.js"></script>
+</body>
+</html>

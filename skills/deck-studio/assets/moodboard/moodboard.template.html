@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мудборд презентации</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b0d;
+    --panel: #131316;
+    --line: #26262b;
+    --text: #ecebe8;
+    --muted: #8d8c91;
+    --faint: #5b5a60;
+    --sans: "Inter Tight", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --serif: "Cormorant Garamond", Georgia, serif;
+    --wide: "Unbounded", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; line-height: 1.5; }
+  a { color: inherit; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+  .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+  header { padding: 88px 0 56px; border-bottom: 1px solid var(--line); }
+  header h1 { font-weight: 200; font-size: clamp(44px, 7vw, 104px); line-height: .95; letter-spacing: -.035em; margin: 22px 0 28px; }
+  header h1 em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+  header p { max-width: 640px; color: var(--muted); font-size: 18px; }
+  .toc { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 36px; }
+  .toc a { text-decoration: none; font-family: var(--mono); font-size: 12px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--text); transition: border-color .2s, background .2s; }
+  .toc a:hover { border-color: var(--muted); background: var(--panel); }
+
+  section.dir { padding: 72px 0; border-bottom: 1px solid var(--line); }
+  .dir-grid { display: grid; grid-template-columns: 340px 1fr; gap: 48px; align-items: start; }
+  .meta { position: sticky; top: 32px; }
+  .letter { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .meta h2 { font-weight: 300; font-size: 44px; letter-spacing: -.03em; line-height: 1; margin: 10px 0 14px; }
+  .meta .for { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+  .meta h3 { font-family: var(--mono); font-weight: 400; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin: 24px 0 10px; }
+  .swatches { display: flex; gap: 6px; }
+  .sw { flex: 1; height: 54px; border-radius: 8px; border: 1px solid rgba(255,255,255,.08); position: relative; }
+  .sw span { position: absolute; left: 6px; bottom: 5px; font-family: var(--mono); font-size: 9.5px; mix-blend-mode: difference; color: #fff; }
+  .fonts p { font-size: 14px; color: var(--text); }
+  .fonts p small { color: var(--muted); font-size: 13px; }
+  .motion { list-style: none; }
+  .motion li { font-size: 14.5px; padding: 8px 0; border-top: 1px solid var(--line); color: #cfcdc8; }
+  .motion li:last-child { border-bottom: 1px solid var(--line); }
+
+  .stage { position: relative; height: 380px; border-radius: 14px; overflow: hidden; margin-bottom: 14px; border: 1px solid var(--line); }
+  .stage .tag { position: absolute; top: 14px; left: 16px; z-index: 5; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+
+  .refs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .refs.three { grid-template-columns: repeat(3, 1fr); }
+  figure { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; transition: border-color .2s, transform .3s; }
+  figure:hover { border-color: #3a3a41; transform: translateY(-2px); }
+  figure a { display: block; text-decoration: none; }
+  figure .img { aspect-ratio: 16 / 10.4; overflow: hidden; background: #000; }
+  figure img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  figure.wide .img { aspect-ratio: 16 / 6; }
+  figcaption { padding: 12px 14px 14px; font-size: 13.5px; color: #c9c7c2; }
+  figcaption b { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }
+
+  /* A — cosmos */
+  #stageA { background: #050507; }
+  #stageA canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #stageA .tag { color: #6f7a8c; }
+  #stageA .title { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; }
+  #stageA .title span { font-weight: 200; font-size: 64px; letter-spacing: -.03em; color: #f2f4f8; animation: blurIn 8s ease-in-out infinite; }
+  @keyframes blurIn { 0%, 8% { opacity: 0; filter: blur(18px); letter-spacing: .1em; } 30%, 70% { opacity: 1; filter: blur(0); letter-spacing: -.03em; } 92%, 100% { opacity: 0; filter: blur(18px); } }
+
+  /* B — warm object */
+  #stageB { background: radial-gradient(120% 90% at 50% 60%, #2a1407 0%, #120b07 55%, #0a0705 100%); }
+  #stageB .tag { color: #b06a33; }
+  #stageB .word { position: absolute; top: 50%; left: 0; transform: translateY(-50%); white-space: nowrap; font-family: var(--wide); font-weight: 900; font-size: 150px; letter-spacing: -.02em; color: #ff8a2a; animation: marquee 16s linear infinite; z-index: 1; }
+  @keyframes marquee { from { transform: translate(0, -50%); } to { transform: translate(-50%, -50%); } }
+  #stageB .orb { position: absolute; left: 50%; top: 50%; width: 230px; height: 230px; margin: -115px 0 0 -115px; border-radius: 50%; z-index: 2;
+    background: radial-gradient(circle at 34% 30%, #ffe2bd 0%, #ff9c47 18%, #c9500f 46%, #4a1a05 78%, #1d0a03 100%);
+    box-shadow: 0 0 120px 30px rgba(255,120,30,.35), inset -24px -30px 60px rgba(0,0,0,.55);
+    animation: float 6s ease-in-out infinite; }
+  #stageB .orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 70%, rgba(255,240,220,.35) 78%, transparent 86%); filter: blur(10px); animation: spin 7s linear infinite; mix-blend-mode: screen; }
+  @keyframes float { 0%, 100% { transform: translateY(-10px) rotate(-6deg); } 50% { transform: translateY(12px) rotate(6deg); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #stageB .grain { position: absolute; inset: -50%; z-index: 4; opacity: .22; pointer-events: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); animation: grain 1s steps(6) infinite; }
+  @keyframes grain { 0% { transform: translate(0,0); } 20% { transform: translate(-3%,2%); } 40% { transform: translate(2%,-3%); } 60% { transform: translate(-2%,-1%); } 80% { transform: translate(3%,3%); } 100% { transform: translate(0,0); } }
+  #stageB .side { position: absolute; z-index: 3; right: 28px; bottom: 26px; max-width: 220px; font-size: 14px; color: #f3e6d3; font-weight: 400; }
+
+  /* C — editorial */
+  #stageC { background: #f4f1ea; color: #121212; }
+  #stageC .tag { color: #8a857b; }
+  #stageC .tag.r { left: auto; right: 16px; }
+  #stageC .lines { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 30px 40px; }
+  #stageC .ln { font-family: var(--serif); font-weight: 500; font-size: 74px; line-height: .98; text-transform: uppercase; letter-spacing: -.01em; overflow: hidden; }
+  #stageC .ln span { display: inline-block; transform: translateY(105%); animation: rise 7s cubic-bezier(.7,0,.2,1) infinite; }
+  #stageC .ln:nth-child(1) { padding-left: 18%; } #stageC .ln:nth-child(1) span { animation-delay: 0s; }
+  #stageC .ln:nth-child(2) { padding-left: 4%; }  #stageC .ln:nth-child(2) span { animation-delay: .12s; }
+  #stageC .ln:nth-child(3) { padding-left: 34%; } #stageC .ln:nth-child(3) span { animation-delay: .24s; color: #d97757; font-style: italic; }
+  #stageC .ln:nth-child(4) { padding-left: 12%; } #stageC .ln:nth-child(4) span { animation-delay: .36s; }
+  @keyframes rise { 0% { transform: translateY(105%); } 8%, 84% { transform: translateY(0); } 93%, 100% { transform: translateY(-105%); } }
+  #stageC .block { position: absolute; right: 9%; top: 26%; width: 110px; height: 150px; background: #d97757; z-index: 0; animation: wipe 7s cubic-bezier(.7,0,.2,1) infinite; }
+  @keyframes wipe { 0%, 4% { clip-path: inset(100% 0 0 0); } 14%, 82% { clip-path: inset(0 0 0 0); } 93%, 100% { clip-path: inset(0 0 100% 0); } }
+
+  /* D */
+  section.layouts { padding: 72px 0; border-bottom: 1px solid var(--line); }
+  .layouts-head { display: grid; grid-template-columns: 340px 1fr; gap: 48px; margin-bottom: 36px; }
+  .layouts-head h2 { font-weight: 300; font-size: 44px; letter-spacing: -.03em; line-height: 1; margin-top: 10px; }
+  .layouts-head p { color: var(--muted); font-size: 16px; max-width: 620px; align-self: end; }
+
+  section.next { padding: 72px 0 110px; }
+  .next h2 { font-weight: 200; font-size: 52px; letter-spacing: -.03em; margin: 12px 0 30px; }
+  .qs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .q { border: 1px solid var(--line); border-radius: 12px; padding: 20px; background: var(--panel); }
+  .q .n { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+  .q p { margin-top: 26px; font-size: 16px; }
+
+  @media (max-width: 980px) {
+    .dir-grid, .layouts-head { grid-template-columns: 1fr; gap: 28px; }
+    .meta { position: static; }
+    .qs { grid-template-columns: 1fr 1fr; }
+    .refs.three { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 620px) {
+    .wrap { padding: 0 16px; }
+    .refs, .refs.three, .qs { grid-template-columns: 1fr; }
+    .stage { height: 300px; }
+    #stageB .word { font-size: 96px; }
+    #stageC .ln { font-size: 44px; }
+    #stageA .title span { font-size: 42px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; }
+    #stageC .ln span { transform: none; }
+    #stageA .title span { opacity: 1; filter: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Mobbin · 23 референса · 16 октября 2026</div>
+    <h1>Из чего соберём<br><em>презентацию</em></h1>
+    <p>Три стилевых направления и набор раскладок для слайдов с цифрами. Вверху каждого направления — живой образец движения, ниже — сайты, у которых берём приёмы. Клик по картинке открывает оригинал на Mobbin.</p>
+    <nav class="toc">
+      <a href="#a">A · Космос</a>
+      <a href="#b">B · Тёплый объект</a>
+      <a href="#c">C · Редакция</a>
+      <a href="#d">D · Слайды с цифрами</a>
+      <a href="#next">Что решить</a>
+    </nav>
+  </div>
+</header>
+
+<!-- A -->
+<section class="dir" id="a">
+  <div class="wrap dir-grid">
+    <aside class="meta">
+      <div class="letter">Направление A</div>
+      <h2>Космос</h2>
+      <p class="for">Тёмный AI-кейноут. Для темы про технологии, видение, «новую эру».</p>
+      <h3>Цвет</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#050507"><span>#050507</span></div>
+        <div class="sw" style="background:#f2f4f8"><span>#F2F4F8</span></div>
+        <div class="sw" style="background:#9ec5ff"><span>#9EC5FF</span></div>
+        <div class="sw" style="background:#6b4cff"><span>#6B4CFF</span></div>
+      </div>
+      <h3>Шрифты</h3>
+      <div class="fonts">
+        <p style="font-weight:200;font-size:22px">Inter Tight 200 <small>— заголовки</small></p>
+        <p style="font-family:var(--mono);font-size:13px">JetBrains Mono <small style="font-family:var(--sans)">— подписи капсом</small></p>
+      </div>
+      <h3>Движение</h3>
+      <ul class="motion">
+        <li>Одно поле частиц на всю презентацию: на каждом слайде оно собирается в новую фигуру — сфера, взрыв лучей, сетка, цифра</li>
+        <li>Заголовки проявляются из размытия</li>
+        <li>Таймлайн — тонкая линия, камера едет вдоль неё</li>
+      </ul>
+    </aside>
+    <div>
+      <div class="stage" id="stageA">
+        <div class="tag">Живой образец · частицы перестраиваются</div>
+        <canvas id="cvA"></canvas>
+        <div class="title"><span>Новая эра</span></div>
+      </div>
+      <div class="refs">
+        <figure><a href="https://mobbin.com/sites/sections/30ab578c-5e08-4070-905a-146bc41a8e12" target="_blank" rel="noopener"><div class="img"><img src="{{a1-grok-hero}}" alt="Grok, первый экран"></div><figcaption><b>Grok</b>Лучи из частиц расходятся из центра, слова заголовка разнесены по диагонали</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/c89f9f86-b4f8-4d83-ae11-71ba2fb6f5f3" target="_blank" rel="noopener"><div class="img"><img src="{{a2-squarespace-sphere}}" alt="Squarespace, сфера из точек"></div><figcaption><b>Squarespace</b>Сфера из точек, внутри маленькая антиква — тишина вместо крика</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/6ab45fd5-cc71-4076-bb37-e7dba8210430" target="_blank" rel="noopener"><div class="img"><img src="{{a3-clay-hero}}" alt="Clay, звёздное небо"></div><figcaption><b>Clay</b>Фиолетовое свечение, звёзды, антиква на тёмном фоне</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/5809b85f-2e44-4d26-998f-9fb4e2379f13" target="_blank" rel="noopener"><div class="img"><img src="{{a4-grok-timeline}}" alt="Grok, линия времени"></div><figcaption><b>Grok · таймлайн</b>Линия времени в одну тонкую линию, моно-даты, активная точка в рамке</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/3dbbd5c1-3e61-4c38-aeec-7475b43e0e7f" target="_blank" rel="noopener"><div class="img"><img src="{{a5-spacexai-stats}}" alt="SpaceXAI, цифры"></div><figcaption><b>SpaceXAI</b>Три огромных числа на еле видимой сетке</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/f31d3b89-0f46-4417-9e7c-c23a9e16bb68" target="_blank" rel="noopener"><div class="img"><img src="{{a6-cloudstudio}}" alt="Cloudstudio"></div><figcaption><b>Cloudstudio</b>Моно-подписи, счётчики, точечная навигация справа — готовый индикатор слайдов</figcaption></a></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- B -->
+<section class="dir" id="b">
+  <div class="wrap dir-grid">
+    <aside class="meta">
+      <div class="letter">Направление B</div>
+      <h2>Тёплый объект</h2>
+      <p class="for">Продуктовый релиз. Для запуска, питча, бренда — когда есть «герой», которого показываем.</p>
+      <h3>Цвет</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#120b07"><span>#120B07</span></div>
+        <div class="sw" style="background:#ff8a2a"><span>#FF8A2A</span></div>
+        <div class="sw" style="background:#c9500f"><span>#C9500F</span></div>
+        <div class="sw" style="background:#f3e6d3"><span>#F3E6D3</span></div>
+      </div>
+      <h3>Шрифты</h3>
+      <div class="fonts">
+        <p style="font-family:var(--wide);font-weight:900;font-size:20px">UNBOUNDED 900 <small style="font-family:var(--sans);font-weight:300">— капс</small></p>
+        <p>Inter Tight 400 <small>— текст</small></p>
+      </div>
+      <h3>Движение</h3>
+      <ul class="motion">
+        <li>Один 3D-объект живёт через все слайды: поворачивается, приближается, уходит в угол</li>
+        <li>Огромные слова проезжают за объектом</li>
+        <li>Оранжевое свечение, плёночное зерно, полутон на фото</li>
+      </ul>
+    </aside>
+    <div>
+      <div class="stage" id="stageB">
+        <div class="tag">Живой образец · объект и слово за ним</div>
+        <div class="word">ЗАПУСК · ЗАПУСК · ЗАПУСК · ЗАПУСК · </div>
+        <div class="orb"></div>
+        <div class="side">Объект — главный герой. Текст обтекает его, а не наоборот.</div>
+        <div class="grain"></div>
+      </div>
+      <div class="refs">
+        <figure><a href="https://mobbin.com/sites/sections/9d67f8ac-8069-4a4b-999a-8ae18e7debf0" target="_blank" rel="noopener"><div class="img"><img src="{{b1-oryzo}}" alt="Oryzo"></div><figcaption><b>Oryzo</b>Один объект в центре, короткий капс слева, пояснение справа</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/5c01eed3-1484-4bcd-8ca6-1354a9b1c9c1" target="_blank" rel="noopener"><div class="img"><img src="{{b2-daylight}}" alt="Daylight"></div><figcaption><b>Daylight</b>Оранжевый поверх тёмного фото, полутоновая сетка</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/f45e712d-3143-4f56-9cb1-92ae9e812c23" target="_blank" rel="noopener"><div class="img"><img src="{{b3-hungry-tiger}}" alt="Eat Hungry Tiger"></div><figcaption><b>Eat Hungry Tiger</b>Огромный капс, объект перекрывает слово</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/82b3e7d8-f568-45a0-bed6-6da9b11f4634" target="_blank" rel="noopener"><div class="img"><img src="{{b4-shopify-sidekick}}" alt="Shopify Sidekick"></div><figcaption><b>Shopify Editions</b>Сжатый капс заголовком, интерфейс выезжает снизу</figcaption></a></figure>
+        <figure class="wide" style="grid-column: span 2"><a href="https://mobbin.com/sites/sections/6944c2bb-f5b4-4bf0-b707-e4c048c17040" target="_blank" rel="noopener"><div class="img"><img src="{{b5-joby-timeline}}" alt="Joby Aviation"></div><figcaption><b>Joby Aviation</b>Годы столбиком поверх кинематографичного фото: активный год белый, остальные тают</figcaption></a></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- C -->
+<section class="dir" id="c">
+  <div class="wrap dir-grid">
+    <aside class="meta">
+      <div class="letter">Направление C</div>
+      <h2>Редакция</h2>
+      <p class="for">Журнал и манифест. Для экспертного доклада, стратегии, курса — когда главное смысл.</p>
+      <h3>Цвет</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#f4f1ea"><span>#F4F1EA</span></div>
+        <div class="sw" style="background:#121212"><span>#121212</span></div>
+        <div class="sw" style="background:#d97757"><span>#D97757</span></div>
+        <div class="sw" style="background:#8a857b"><span>#8A857B</span></div>
+      </div>
+      <h3>Шрифты</h3>
+      <div class="fonts">
+        <p style="font-family:var(--serif);font-weight:500;font-size:24px">Cormorant Garamond <small style="font-family:var(--sans)">— заголовки</small></p>
+        <p style="font-family:var(--mono);font-size:13px">JetBrains Mono <small style="font-family:var(--sans)">— служебные подписи</small></p>
+      </div>
+      <h3>Движение</h3>
+      <ul class="motion">
+        <li>Кинетическая типографика: слова заголовка встают лесенкой по сетке</li>
+        <li>Смена слайда — шторка, как перелистывание журнала</li>
+        <li>Акцентный цветной блок вырезается и прячется вместе с текстом</li>
+      </ul>
+    </aside>
+    <div>
+      <div class="stage" id="stageC">
+        <div class="tag">Живой образец · слова лесенкой</div>
+        <div class="tag r">03 / 12</div>
+        <div class="block"></div>
+        <div class="lines">
+          <div class="ln"><span>Мы делаем</span></div>
+          <div class="ln"><span>сложное</span></div>
+          <div class="ln"><span>простым</span></div>
+          <div class="ln"><span>и красивым</span></div>
+        </div>
+      </div>
+      <div class="refs">
+        <figure><a href="https://mobbin.com/sites/sections/37214c10-d891-48bc-a46e-6050033671b4" target="_blank" rel="noopener"><div class="img"><img src="{{c1-studio-freight}}" alt="Studio Freight"></div><figcaption><b>Studio Freight</b>Слова лесенкой по сетке, антиква плюс моно, картинка врезана в строку</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/5456030e-9762-4284-a0de-76b4907fc9de" target="_blank" rel="noopener"><div class="img"><img src="{{c4-claude}}" alt="Claude"></div><figcaption><b>Claude</b>Тёплая бумага, антиква, терракотовая вырезка-иллюстрация</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/4de98a06-dbff-4e54-83c6-a301c519bba0" target="_blank" rel="noopener"><div class="img"><img src="{{c2-ssense}}" alt="SSENSE"></div><figcaption><b>SSENSE</b>Капс-гротеск заголовком, антиква подзаголовком</figcaption></a></figure>
+        <figure><a href="https://mobbin.com/sites/sections/c74bd692-ef4d-4b36-9968-a7bc7321b7bc" target="_blank" rel="noopener"><div class="img"><img src="{{c3-serus}}" alt="Serus"></div><figcaption><b>Serus</b>Антиква и моно в центре, ASCII-текстура по фону</figcaption></a></figure>
+        <figure class="wide" style="grid-column: span 2"><a href="https://mobbin.com/sites/sections/a5b3c6c0-dd04-4ca2-b06b-4ee1c673c2a5" target="_blank" rel="noopener"><div class="img"><img src="{{c5-v7-timeline}}" alt="V7"></div><figcaption><b>V7</b>Таймлайн из тонких штрихов, события отмечены цветными рисками</figcaption></a></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- D -->
+<section class="layouts" id="d">
+  <div class="wrap">
+    <div class="layouts-head">
+      <div>
+        <div class="letter">Блок D</div>
+        <h2>Слайды с цифрами</h2>
+      </div>
+      <p>Раскладки, которые подойдут к любому из трёх направлений: перекрашиваем под выбранную палитру и шрифты. Цифры будут досчитываться при появлении слайда.</p>
+    </div>
+    <div class="refs three">
+      <figure><a href="https://mobbin.com/sites/sections/f85060f2-e490-4793-b11f-86d41a6a2cd0" target="_blank" rel="noopener"><div class="img"><img src="{{d1-robot-bento}}" alt="Robot.com"></div><figcaption><b>Robot.com</b>Бенто из цифр и одна тёмная карточка с графикой</figcaption></a></figure>
+      <figure><a href="https://mobbin.com/sites/sections/979fe5b7-85d8-450e-8b61-5534ff3f1f97" target="_blank" rel="noopener"><div class="img"><img src="{{d3-glide-numbers}}" alt="Glide"></div><figcaption><b>Glide</b>Гигантские числа, разделённые линиями, пояснение справа</figcaption></a></figure>
+      <figure><a href="https://mobbin.com/sites/sections/9038df26-d13c-4c95-98d5-62ba4fd5fad3" target="_blank" rel="noopener"><div class="img"><img src="{{d6-attio-bento}}" alt="Attio"></div><figcaption><b>Attio</b>Тёмный бенто с каркасными схемами вместо картинок</figcaption></a></figure>
+      <figure><a href="https://mobbin.com/sites/sections/34a2151f-c9b2-4121-b790-8e85202fe9ca" target="_blank" rel="noopener"><div class="img"><img src="{{d2-spade-stats}}" alt="Spade"></div><figcaption><b>Spade</b>Карточки-метрики с моно-ярлыком и уголками</figcaption></a></figure>
+      <figure><a href="https://mobbin.com/sites/sections/02770c29-a1ea-4602-894f-9a59a779f0ea" target="_blank" rel="noopener"><div class="img"><img src="{{d4-aave-dots}}" alt="Aave"></div><figcaption><b>Aave</b>Числа плюс точечная визуализация вместо диаграммы</figcaption></a></figure>
+      <figure><a href="https://mobbin.com/sites/sections/fe2855ba-d425-4440-aae5-2309ce937cf5" target="_blank" rel="noopener"><div class="img"><img src="{{d5-revolut-years}}" alt="Revolut"></div><figcaption><b>Revolut</b>Цветные карточки-годы со списком событий</figcaption></a></figure>
+      <figure><a href="https://mobbin.com/sites/sections/6061ffe4-2548-4974-8cad-73e6fe964120" target="_blank" rel="noopener"><div class="img"><img src="{{d7-equals-mosaic}}" alt="Equals"></div><figcaption><b>Equals</b>Пиксельная мозаика — готовая идея перехода между слайдами</figcaption></a></figure>
+    </div>
+  </div>
+</section>
+
+<section class="next" id="next">
+  <div class="wrap">
+    <div class="kicker">Дальше</div>
+    <h2>Что нужно решить</h2>
+    <div class="qs">
+      <div class="q"><div class="n">01</div><p>Какое направление берём: A, B, C или смесь (например, тёмный «Космос» с антиквой из «Редакции»)</p></div>
+      <div class="q"><div class="n">02</div><p>О чём презентация, кто её смотрит и есть ли готовый текст или тезисы</p></div>
+      <div class="q"><div class="n">03</div><p>Сколько слайдов и как показываем: со сцены по кликам или ссылкой, которую листают сами</p></div>
+      <div class="q"><div class="n">04</div><p>Есть ли логотип, фирменные цвета, фото продукта, которые обязательно нужны</p></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const cv = document.getElementById('cvA');
+  const ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = 1400;
+  const pts = [];
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i / (N - 1)) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const th = golden * i;
+    const sphere = [Math.cos(th) * r, y, Math.sin(th) * r];
+    // burst: points sit along 48 rays from the centre
+    const ray = i % 48;
+    const a1 = ray * 2.399, a2 = Math.acos(1 - 2 * ((ray * 0.618) % 1));
+    const d = Math.pow(Math.random(), 0.6) * 1.9;
+    const burst = [Math.sin(a2) * Math.cos(a1) * d, Math.cos(a2) * d, Math.sin(a2) * Math.sin(a1) * d];
+    pts.push({ s: sphere, b: burst, accent: Math.random() < 0.025, size: Math.random() < 0.08 ? 2 : 1 });
+  }
+  let W, H, dpr;
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  addEventListener('resize', resize);
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function frame(t) {
+    const sec = t / 1000;
+    const cycle = (sec % 8) / 8;           // 8s loop: sphere -> burst -> sphere
+    let m = cycle < .4 ? 0 : cycle < .5 ? ease((cycle - .4) / .1) : cycle < .9 ? 1 : 1 - ease((cycle - .9) / .1);
+    if (reduce) m = 0;
+    const rot = reduce ? 0.6 : sec * 0.18;
+    const c = Math.cos(rot), s = Math.sin(rot);
+    const R = Math.min(W, H) * 0.36;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      const x0 = p.s[0] + (p.b[0] - p.s[0]) * m;
+      const y0 = p.s[1] + (p.b[1] - p.s[1]) * m;
+      const z0 = p.s[2] + (p.b[2] - p.s[2]) * m;
+      const x = x0 * c - z0 * s, z = x0 * s + z0 * c;
+      const persp = 2.6 / (2.6 + z);
+      const px = W / 2 + x * R * persp, py = H / 2 + y0 * R * persp;
+      const alpha = Math.max(0.08, Math.min(1, (1.4 - z) / 2.2));
+      if (p.accent) { ctx.fillStyle = `rgba(158,197,255,${alpha})`; ctx.fillRect(px - 2.5, py - 2.5, 5, 5); }
+      else { ctx.fillStyle = `rgba(235,240,250,${alpha * 0.75})`; ctx.fillRect(px, py, p.size, p.size); }
+    }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

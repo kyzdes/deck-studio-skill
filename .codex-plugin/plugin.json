@@ -1,0 +1,41 @@
+{
+  "name": "deck-studio",
+  "version": "0.1.0",
+  "description": "Анимированные HTML-презентации с живым полем частиц: мудборд, сюжет, 20 макетов, свои фигуры, проверка скриншотами, окно спикера. Один файл без интернета. Не для .pptx и не для правки одних текстов (это deck-copy).",
+  "author": {
+    "name": "kyzdes",
+    "url": "https://github.com/kyzdes"
+  },
+  "homepage": "https://github.com/kyzdes/deck-studio-skill",
+  "repository": "https://github.com/kyzdes/deck-studio-skill",
+  "keywords": [
+    "presentation",
+    "slides",
+    "html-deck",
+    "animation",
+    "particles",
+    "keynote",
+    "moodboard",
+    "speaker-notes",
+    "russian"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Deck Studio",
+    "shortDescription": "HTML-презентации с частицами: мудборд → сюжет → 20 макетов → сцена",
+    "longDescription": "Собирает презентацию одним HTML-файлом: сцена 1920×1080, под ней поле из 1800 частиц, которое на каждом слайде перетекает в новую фигуру — сферу, кольцо, рамку, TARDIS, ракету или любую свою через DECK_SHAPES. Заголовки проявляются по словам, цифры досчитываются, шаги открываются по клику, у спикера отдельное окно с таймером, заметками и списком пустых полей. Шрифты и картинки вшиты, поэтому файл работает без интернета и показывается шарингом экрана. Путь целиком: бриф, мудборд по Mobbin с тремя направлениями и живыми образцами движения, сюжетная дуга и тексты (вместе с плагином deck-copy и агентом deck-copywriter), сборка из каталога 20 макетов, проверка скриптом и скриншотами, итерации по размеченным скриншотам автора, сдача с сообщением ссылок для чата. Файлы .pptx, Keynote и Google Slides — не сюда.",
+    "developerName": "kyzdes",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/kyzdes/deck-studio-skill",
+    "defaultPrompt": [
+      "Сделай крутую презентацию на HTML с анимациями к моему докладу на 20 минут.",
+      "Собери мудборд по Mobbin и предложи три стиля для презентации.",
+      "Как в прошлый раз, но на другую тему: собери презу про запуск продукта."
+    ],
+    "brandColor": "#E8875F"
+  }
+}
