@@ -45,17 +45,35 @@ open ~/Desktop/my-talk/index.html
 
 ## Установка
 
+Плагин живёт в публичном маркетплейсе [kyzdes/claude-skills](https://github.com/kyzdes/claude-skills). Если вы его ещё не подключали, начните с первой команды.
+
+Claude Code (команды вводятся в сессии):
+
 ```
-claude plugin marketplace update claude-skills
-claude plugin install deck-studio@claude-skills
+/plugin marketplace add kyzdes/claude-skills
+/plugin install deck-studio@claude-skills
 ```
 
 Codex:
 
 ```
+codex plugin marketplace add https://github.com/kyzdes/claude-skills.git
+codex plugin add deck-studio@claude-skills
+```
+
+Маркетплейс уже подключён — обновите его и поставьте плагин:
+
+```
+claude plugin marketplace update claude-skills
+claude plugin install deck-studio@claude-skills
+```
+
+```
 codex plugin marketplace upgrade
 codex plugin add deck-studio@claude-skills
 ```
+
+После установки откройте новую сессию и напишите, например: «Сделай крутую презентацию на HTML про …». Плагин обновляется сам при старте сессии, не чаще раза в 4 часа; отключить — переменная окружения `KKZ_NO_AUTOUPDATE=1`.
 
 ## Границы
 
