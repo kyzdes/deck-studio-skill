@@ -17,6 +17,8 @@ import sys
 KNOWN_FX = {"sphere", "ring", "horizon", "burst", "lines", "dust", "box", "open", "tardis", "planet",
             "scatter", "frame", "dive", "speed", "icons", "shape"}
 KNOWN_ICONS = {"planet", "artboard", "laptop", "mlnet", "gear", "bulb", "tardis"}
+KNOWN_THEMES = {"dark", "light"}
+KNOWN_ACCENTS = {"terracotta", "blue", "violet", "green", "amber", "rose", "mono"}
 
 
 def strip(s):
@@ -85,7 +87,20 @@ def main():
     print(f"\n{'№':>3}  {'время':>5}  {'клики':>5}  {'формация':<26} заголовок")
     for i, act, tm, steps, fx, title, _ in rows:
         print(f"{i:>3}  {tm:>5}  {steps or '':>5}  {fx[:26]:<26} {title[:90]}")
-    print(f"\nСлайдов: {len(rows)} · время: {total // 60}:{total % 60:02d} · цель: {int(target)}:{int(target * 60 % 60):02d}")
+    tag = (re.search(r"<html[^>]*>", src) or [""])[0]
+    theme = (re.search(r'data-theme="([^"]*)"', tag) or [None, "dark"])[1]
+    am = re.search(r'data-accent="([^"]*)"', tag)
+    accent = am[1] if am else "terracotta"
+    head_css = re.sub(r"/\*.*?\*/", "", src.split("</head>", 1)[0], flags=re.S)
+    own = re.search(r":root\s*\{[^}]*--accent\s*:\s*([^;}]+)", head_css)
+    if own:
+        accent = own[1].strip() + " (свой цвет в <style>)"
+    print(f"\nТема: {theme} · акцент: {accent}")
+    if theme not in KNOWN_THEMES:
+        print(f"  ! неизвестная тема «{theme}»: dark или light"); problems += 1
+    if not own and accent not in KNOWN_ACCENTS:
+        print(f"  ! неизвестный акцент «{accent}»: {', '.join(sorted(KNOWN_ACCENTS))} или свой цвет в <style>"); problems += 1
+    print(f"Слайдов: {len(rows)} · время: {total // 60}:{total % 60:02d} · цель: {int(target)}:{int(target * 60 % 60):02d}")
     if abs(total - target * 60) > 30:
         print("  ! сумма data-time расходится с целью больше чем на 30 секунд"); problems += 1
 

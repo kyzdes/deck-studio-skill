@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="dark" data-accent="terracotta">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,8 +7,10 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="engine.css">
 <style>
-/* Правки под конкретную деку: токены темы (references/themes.md) и разовые позиции.
-   Пример: :root { --accent: #5aa9ff; } */
+/* Тема и акцент — атрибуты <html> выше: data-theme="dark|light",
+   data-accent="terracotta|blue|violet|green|amber|rose|mono".
+   Свой цвет бренда: :root { --accent: #5aa9ff; } [data-theme="light"] { --accent: #1f5fd0; }
+   Здесь же — разовые позиции под конкретную деку (references/themes.md). */
 </style>
 </head>
 <body>
@@ -360,6 +362,8 @@ window.DECK_SHAPES = {
     <dt>N</dt><dd>окно заметок спикера с таймером</dd>
     <dt>цифры + Enter</dt><dd>перейти к слайду</dd>
     <dt>Home · End</dt><dd>первый · последний слайд</dd>
+    <dt>T</dt><dd>светлая / тёмная тема (до перезагрузки)</dd>
+    <dt>A</dt><dd>следующий акцентный цвет</dd>
     <dt>H · ?</dt><dd>эта подсказка</dd>
   </dl>
 </div>

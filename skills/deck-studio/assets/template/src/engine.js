@@ -11,7 +11,9 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fmt = v => typeof v === 'number' ? v.toLocaleString(CFG.locale) : String(v);
 slides.forEach((s, i) => s.id = 's' + (i + 1));
 const cssVar = (name, fb) => (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim() || fb;
-const THEME = { ink: cssVar('--ink', '#f1eee8'), accent: cssVar('--accent', '#e8875f'), muted: cssVar('--muted', '#9b9ca4'), line: cssVar('--line', 'rgba(241,238,232,.14)') };
+const THEME = {};
+const readTheme = () => Object.assign(THEME, { ink: cssVar('--ink', '#f1eee8'), accent: cssVar('--accent', '#e8875f'), muted: cssVar('--muted', '#9b9ca4'), line: cssVar('--line', 'rgba(241,238,232,.14)') });
+readTheme();
 
 /* ---------- data fields ---------- */
 const missing = new Set();
@@ -90,12 +92,12 @@ document.querySelectorAll('svg.gapchart').forEach((svg, ci) => {
   const work = 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
   const gap = work + ` L${CH.x1} ${CH.yb} L${CH.x0} ${CH.yb} Z`, gid = 'gg' + ci;
   svg.innerHTML = `
-    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${THEME.accent}" stop-opacity=".30"/><stop offset="1" stop-color="${THEME.accent}" stop-opacity=".03"/></linearGradient></defs>
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--accent)" stop-opacity=".30"/><stop offset="1" style="stop-color:var(--accent)" stop-opacity=".03"/></linearGradient></defs>
     <path class="fade" style="--d:2.2s" d="${gap}" fill="url(#${gid})"/>
-    <line x1="${CH.x1}" y1="${CH.yt - 40}" x2="${CH.x1}" y2="${CH.yb + 16}" style="stroke:${THEME.line};--d:1.6s" stroke-width="2" stroke-dasharray="4 10" class="fade"/>
-    <path class="draw" style="--d:.9s;stroke:${THEME.muted}" pathLength="1" d="M${CH.x0} ${CH.yb} L${CH.x1} ${CH.yb}" stroke-width="3" fill="none"/>
-    <path class="draw" style="--d:1.1s;stroke:${THEME.ink}" pathLength="1" d="${work}" stroke-width="3" fill="none"/>
-    <circle class="fade" style="--d:2.6s;fill:${THEME.accent}" cx="${CH.x1}" cy="${CH.yt}" r="9"/>`;
+    <line x1="${CH.x1}" y1="${CH.yt - 40}" x2="${CH.x1}" y2="${CH.yb + 16}" style="stroke:var(--line);--d:1.6s" stroke-width="2" stroke-dasharray="4 10" class="fade"/>
+    <path class="draw" style="--d:.9s;stroke:var(--muted)" pathLength="1" d="M${CH.x0} ${CH.yb} L${CH.x1} ${CH.yb}" stroke-width="3" fill="none"/>
+    <path class="draw" style="--d:1.1s;stroke:var(--ink)" pathLength="1" d="${work}" stroke-width="3" fill="none"/>
+    <circle class="fade" style="--d:2.6s;fill:var(--accent)" cx="${CH.x1}" cy="${CH.yt}" r="9"/>`;
   let lab = svg.nextElementSibling;
   if (!lab || !lab.classList.contains('gapchart-labels')) { lab = document.createElement('div'); lab.className = 'gapchart-labels'; svg.after(lab); }
   const g = workPt(.8);
@@ -148,7 +150,9 @@ const FX = (() => {
     k[i] = 1.1 + R() * 3.4; s1[i] = R(); s2[i] = R(); s3[i] = R();
     acc[i] = i % 31 === 0 ? 1 : 0;
   }
-  const COL = [THEME.ink, THEME.accent, THEME.muted, THEME.accent];
+  const COL = [];
+  const recolor = () => { COL[0] = THEME.ink; COL[1] = THEME.accent; COL[2] = THEME.muted; COL[3] = THEME.accent; };
+  recolor();
   let S = 1, OX = 0, OY = 0, dpr = 1, form = [], formName = '', formT0 = 0, last = performance.now() / 1000;
 
   function project(o, n, bx, by, bz, cx, cy, Rr, opt) {
@@ -503,7 +507,7 @@ const FX = (() => {
   addEventListener('resize', resize);
   resize();
   requestAnimationFrame(frame);
-  return { set, resize };
+  return { set, resize, recolor };
 })();
 
 /* ======================================================================
@@ -641,12 +645,27 @@ setInterval(() => {
 
 /* ---------- keys, mouse ---------- */
 function toast(msg) {
+  document.querySelectorAll('.toast').forEach(o => o.remove());
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
   setTimeout(() => t.remove(), 4000);
 }
 let digits = '', dT = 0;
 const help = document.getElementById('help');
 function fullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+/* ---------- theme & accent on the fly (T / A): for a bright room or a quick look; the file keeps its own setting ---------- */
+const ACCENTS = ['terracotta', 'blue', 'violet', 'green', 'amber', 'rose', 'mono'];
+const ACCENT_RU = { terracotta: 'терракота', blue: 'синий', violet: 'фиолетовый', green: 'зелёный', amber: 'янтарь', rose: 'розовый', mono: 'монохром' };
+function applyTheme(msg) { readTheme(); FX.recolor(); toast(msg + ' · до перезагрузки'); }
+function switchTheme() {
+  const el = document.documentElement, light = el.dataset.theme !== 'light';
+  el.dataset.theme = light ? 'light' : 'dark';
+  applyTheme(light ? 'Светлая тема' : 'Тёмная тема');
+}
+function switchAccent() {
+  const el = document.documentElement, i = ACCENTS.indexOf(el.dataset.accent || 'terracotta');
+  el.dataset.accent = ACCENTS[(i + 1) % ACCENTS.length];
+  applyTheme('Акцент: ' + ACCENT_RU[el.dataset.accent]);
+}
 function onKey(e) {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key, c = e.code;
@@ -658,6 +677,8 @@ function onKey(e) {
   else if (/^Digit[0-9]$/.test(c)) { digits += c.slice(5); clearTimeout(dT); dT = setTimeout(() => digits = '', 1500); }
   else if (c === 'KeyF') fullscreen();
   else if (c === 'KeyN') openNotes();
+  else if (c === 'KeyT') switchTheme();
+  else if (c === 'KeyA') switchAccent();
   else if (c === 'KeyH' || k === '?') help.classList.toggle('on');
   else if (k === 'Escape') help.classList.remove('on');
 }

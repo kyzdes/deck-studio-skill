@@ -1,10 +1,10 @@
 ---
 name: deck-studio
 description: >-
-  Build a stunning single-file HTML presentation — a 1920×1080 stage with a living particle field that morphs into a new figure on every slide (sphere, rings, frames, TARDIS, rockets, custom shapes), word-by-word title reveals, click-steps, count-up numbers, a presenter window with timer and notes, all fonts and images inlined so it runs offline from a laptop. Covers the whole path: brief → Mobbin moodboard with three live style directions → story and copy → assembly from a catalogue of 20 tested layouts → screenshot verification → iterating on the author's marked-up screenshots → handover with a chat message of links. Use whenever the user wants a presentation, deck, slides, talk or keynote that should look spectacular or "wow", be animated, have transitions, or be shown in a browser / via screen share — «сделай презентацию», «крутая презентация», «презентация на HTML», «анимированные слайды», «презентация с анимациями и переходами», «дека для выступления», «слайды к докладу», «как в прошлый раз, но на другую тему», «собери презу», «мудборд для презентации», «HTML deck», «animated slides», «reveal-style deck», «keynote in the browser» — even if they do not say HTML. NOT for .pptx / Keynote / Google Slides files (use the pptx skill); NOT for text-only work on an existing deck (use deck-copy); NOT for websites or landing pages.
+  Build a stunning single-file HTML presentation — dark or light theme, seven accent colours or a brand colour, a 1920×1080 stage with a living particle field that morphs into a new figure on every slide (sphere, rings, frames, TARDIS, rockets, custom shapes), word-by-word title reveals, click-steps, count-up numbers, a presenter window with timer and notes, all fonts and images inlined so it runs offline from a laptop. Covers the whole path: brief → Mobbin moodboard with three live style directions → story and copy → assembly from a catalogue of 20 tested layouts → screenshot verification → iterating on the author's marked-up screenshots → handover with a chat message of links. Use whenever the user wants a presentation, deck, slides, talk or keynote that should look spectacular or "wow", be animated, have transitions, or be shown in a browser / via screen share — «сделай презентацию», «крутая презентация», «презентация на HTML», «анимированные слайды», «презентация с анимациями и переходами», «дека для выступления», «слайды к докладу», «как в прошлый раз, но на другую тему», «собери презу», «мудборд для презентации», «HTML deck», «animated slides», «reveal-style deck», «keynote in the browser» — even if they do not say HTML. NOT for .pptx / Keynote / Google Slides files (use the pptx skill); NOT for text-only work on an existing deck (use deck-copy); NOT for websites or landing pages.
 metadata:
   short-description: "HTML-презентации с живыми частицами: мудборд, сюжет, 20 макетов, проверка, сцена"
-  version: "0.1"
+  version: "0.2"
 ---
 
 # Deck Studio — HTML-презентация, которую запоминают
@@ -24,19 +24,19 @@ metadata:
 | Тексты | `references/copy-rules.md` | Этап 3: сюжетная дуга, правила заголовков, вычитка агентом |
 | Макеты | `references/layouts.md` | Этап 4: каталог 20 макетов, координаты, рецепты |
 | Частицы | `references/particles.md` | Этап 4: формации, фигуры, свои метафоры через `DECK_SHAPES` |
-| Тема | `references/themes.md` | Когда выбрано направление: токены, три палитры, шрифты |
+| Тема | `references/themes.md` | Когда выбрано направление: светлая / тёмная, акценты, цвет бренда, токены, шрифты |
 | Проверка | `references/gotchas.md` | Перед первым скриншотом и перед сдачей |
 
 ## Путь за семь шагов
 
-1. **Бриф.** Тема, зал, повод, что зал сделает после, как показывают (обычно шаринг экрана ноутбука), длительность. Один `AskUserQuestion`, а то, что автор уже сказал, не переспрашивай.
+1. **Бриф.** Тема, зал, повод, что зал сделает после, как показывают (обычно шаринг экрана ноутбука) и насколько светлый зал, длительность. Один `AskUserQuestion`, а то, что автор уже сказал, не переспрашивай.
 2. **Мудборд.** 6–7 запросов к Mobbin → 20–25 референсов → `moodboard.html` с тремя направлениями и живым движением у каждого → автор выбирает (часто смесь).
 3. **Сюжет и тексты.** Если установлен `deck-copy` — загрузи его (носитель «сцена»). `copy.md` по шаблону: бриф, заголовки подряд, слайды. Вычитку отдай агенту `deck-copywriter` в фоне.
 4. **Сборка.**
    ```
-   python3 <skill>/scripts/new_deck.py ./presentation --title "Название" --minutes 20
+   python3 <skill>/scripts/new_deck.py ./presentation --title "Название" --minutes 20 --theme dark --accent terracotta
    ```
-   В `presentation/src/deck.html` лежит каталог из 20 рабочих макетов: оставь нужные, перепиши тексты, цифры вынеси в `DECK_DATA`, тему — в `<style>`. Затем `python3 presentation/src/build.py` → `presentation/index.html`.
+   В `presentation/src/deck.html` лежит каталог из 20 рабочих макетов: оставь нужные, перепиши тексты, цифры вынеси в `DECK_DATA`. Тема и акцент — атрибуты `<html>` (`data-theme="dark|light"`, `data-accent="terracotta|blue|violet|green|amber|rose|mono"`), цвет бренда — `--accent` в `<style>`. Затем `python3 presentation/src/build.py` → `presentation/index.html`.
 5. **Проверка.**
    ```
    python3 <skill>/scripts/check_deck.py ./presentation
@@ -85,6 +85,8 @@ presentation/
 | ← ↑ PageUp Backspace | Назад |
 | F | Полный экран |
 | N | Окно заметок: таймер, заметки, следующий слайд, пустые поля |
+| T | Светлая / тёмная тема на лету (до перезагрузки) — если зал оказался светлым |
+| A | Следующий акцентный цвет — показать автору варианты |
 | H или ? | Справка |
 | Цифры + Enter | Перейти к слайду; Home / End — к первому / последнему |
 
