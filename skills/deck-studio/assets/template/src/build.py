@@ -2,19 +2,20 @@
 
 Встраивает в deck.html всё локальное: <link rel="stylesheet" href="…"> (шрифты, engine.css),
 <script src="…"></script> (engine.js) и картинки src="assets/…" как data URI.
-Готовый файл открывается без интернета и без сервера.
+Готовый файл открывается без интернета и без сервера. Если картинки из assets/ нет,
+файл всё равно пишется, но код возврата 1 — такую деку нельзя отдавать.
 
-Запуск из папки презентации:  python3 src/build.py  [куда-ещё-скопировать.html …]
+Запуск из папки презентации:  python3 src/build.py
 """
 import base64
 import mimetypes
 import pathlib
 import re
-import shutil
 import sys
 
 here = pathlib.Path(__file__).resolve().parent
 html = (here / "deck.html").read_text(encoding="utf-8")
+missing = []
 
 
 def inline_css(m):
@@ -28,7 +29,7 @@ def inline_js(m):
 def inline_asset(m):
     f = here / "assets" / m.group(1)
     if not f.exists():
-        print("  ! нет файла", f)
+        missing.append(f)
         return m.group(0)
     mime = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
     return 'src="data:%s;base64,%s"' % (mime, base64.b64encode(f.read_bytes()).decode())
@@ -41,6 +42,7 @@ html = re.sub(r'src="assets/([^"]+)"', inline_asset, html)
 out = here.parent / "index.html"
 out.write_text(html, encoding="utf-8")
 print(out, round(out.stat().st_size / 1e3), "KB")
-for extra in sys.argv[1:]:
-    shutil.copy(out, extra)
-    print("  copy ->", extra)
+if missing:
+    for f in missing:
+        print("  ! нет файла", f)
+    sys.exit("Сборка неполная: на слайдах будут пустые картинки")

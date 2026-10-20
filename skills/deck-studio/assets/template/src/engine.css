@@ -180,11 +180,13 @@ body.idle, body.idle * { cursor: none !important; }
 .vote { display: grid; place-items: center; height: 76px; border-radius: 12px; font: 500 22px/1 var(--mono); transform: scale(0); transition: transform .6s var(--ease); transition-delay: var(--d, 0s); }
 .vote.g0 { background: var(--accent); color: var(--on-accent); }
 .vote.g1 { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--accent); }
+.vote.g2 { border: 2px solid var(--line-2); color: var(--muted); }
 .slide.active .vote { transform: scale(1); }
 .votes-legend { left: 120px; top: 800px; display: flex; gap: 34px; font: 500 18px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .votes-legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 12px; vertical-align: -2px; }
 .votes-legend i.g0 { background: var(--accent); }
 .votes-legend i.g1 { border: 2px solid var(--accent); background: var(--accent-soft); }
+.votes-legend i.g2 { border: 2px solid var(--line-2); }
 .votes-legend b { color: var(--ink); font-weight: 500; margin-right: 8px; }
 .votes-note { left: 120px; top: 846px; font: 400 28px/1.4 var(--sans); color: var(--body); }
 .quotes { position: absolute; left: 960px; right: 120px; top: 400px; display: flex; flex-direction: column; gap: 22px; }

@@ -3,7 +3,7 @@
     python3 check_deck.py <папка деки | путь к src/deck.html> [--minutes 20]
 
 Печатает таблицу слайдов (номер, раздел, время, шаги по клику, формация, заголовок),
-сумму времени против цели, незаполненные поля DECK_DATA (null), поля data-f,
+сумму времени против цели, незаполненные поля DECK_DATA (null или пустая строка), поля data-f,
 которых нет в DECK_DATA, неизвестные формации и пометки [в квадратных скобках]
 в заметках — это открытые вопросы к автору, и соседние слайды с одной формацией
 (переход частиц не виден — это предупреждение, не ошибка). Код возврата 1, если есть проблемы.
@@ -14,11 +14,28 @@ import pathlib
 import re
 import sys
 
-KNOWN_FX = {"sphere", "ring", "horizon", "burst", "lines", "dust", "box", "open", "tardis", "planet",
-            "scatter", "frame", "dive", "speed", "icons", "shape"}
-KNOWN_ICONS = {"planet", "artboard", "laptop", "mlnet", "gear", "bulb", "tardis"}
 KNOWN_THEMES = {"dark", "light"}
-KNOWN_ACCENTS = {"terracotta", "blue", "violet", "green", "amber", "rose", "mono"}
+TEMPLATE_ENGINE = pathlib.Path(__file__).resolve().parent.parent / "assets" / "template" / "src" / "engine.js"
+STRING_OR_COMMENT = r"('(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\"|`[^`]*`)|//[^\n]*"
+
+
+def engine_names(engine):
+    """Формации, фигуры и акценты берём из самого движка, чтобы списки не расходились."""
+    js = engine.read_text(encoding="utf-8")
+    block = lambda name: js.split(f"const {name} = {{", 1)[1].split("\n  };", 1)[0]
+    keys = lambda name: set(re.findall(r"^\s{4}([a-z]\w*)\s*:", block(name), re.M))
+    accents = set(re.findall(r"'(\w+)'", js.split("const ACCENTS = [", 1)[1].split("]", 1)[0]))
+    return keys("FORMS"), keys("ICONS"), accents
+
+
+def deck_data(src):
+    """Ключи DECK_DATA и пустые поля (null, '' — как в движке) по всему блоку, а не по строкам."""
+    m = re.search(r"window\.DECK_DATA\s*=\s*\{(.*?)\n\s*\};?", src, re.S)
+    if not m:
+        return set(), []
+    body = re.sub(STRING_OR_COMMENT, lambda x: x.group(1) or "", m.group(1))
+    pairs = re.findall(r"([A-Za-z_]\w*)\s*:\s*('(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"|`[^`]*`|[^,\n}]+)", body)
+    return {k for k, _ in pairs}, [k for k, v in pairs if v.strip() in ("null", "undefined", "''", '""', "``")]
 
 
 def strip(s):
@@ -34,24 +51,21 @@ def main():
     if p.is_dir():
         p = p / "src" / "deck.html" if (p / "src" / "deck.html").exists() else p / "deck.html"
     src = p.read_text(encoding="utf-8")
+    engine = p.parent / "engine.js"
+    KNOWN_FX, KNOWN_ICONS, KNOWN_ACCENTS = engine_names(engine if engine.exists() else TEMPLATE_ENGINE)
 
     m = re.search(r"DECK_CONFIG\s*=\s*\{[^}]*minutes:\s*([\d.]+)", src)
     target = a.minutes or (float(m.group(1)) if m else 20)
-    data_block = re.search(r"window\.DECK_DATA\s*=\s*\{(.*?)\n\};", src, re.S)
-    data_keys, nulls = set(), []
-    if data_block:
-        for line in data_block.group(1).splitlines():
-            km = re.match(r"\s*([A-Za-z_]\w*)\s*:\s*(.+?),?\s*(//.*)?$", line)
-            if km:
-                data_keys.add(km.group(1))
-                if km.group(2).rstrip(",").strip() == "null":
-                    nulls.append(km.group(1))
+    data_keys, nulls = deck_data(src)
     shapes = set(re.findall(r"^\s{2}([A-Za-z_]\w*)\s*:\s*\{\s*$", src.split("window.DECK_SHAPES", 1)[1].split("</script>", 1)[0], re.M)) if "window.DECK_SHAPES" in src else set()
 
     problems = 0
     total = 0
     rows = []
-    for i, sm in enumerate(re.finditer(r'<section class="slide"([^>]*)>(.*?)</section>', src, re.S), 1):
+    # движок берёт все .slide, поэтому и здесь слайд — любой <section>, где среди классов есть slide
+    sections = [sm for sm in re.finditer(r"<section\b([^>]*)>(.*?)</section>", src, re.S)
+                if re.search(r'class="[^"]*\bslide\b', sm.group(1))]
+    for i, sm in enumerate(sections, 1):
         attrs, body = sm.group(1), sm.group(2)
         get = lambda name: (re.search(name + r'="([^"]*)"', attrs) or [None, ""])[1]
         fx, act, tm = get("data-fx"), get("data-act"), get("data-time")

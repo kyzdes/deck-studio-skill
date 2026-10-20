@@ -122,13 +122,13 @@ document.querySelectorAll('.dots').forEach(box => {
   }
 });
 
-/* ---------- ratings grid: <div class="votes" data-groups="10:27,9:5"> (label:count, count may be @field) ---------- */
+/* ---------- ratings grid: <div class="votes" data-groups="10:27,9:5,8:1"> (label:count, count may be @field; groups 3+ share the quiet style g2) ---------- */
 document.querySelectorAll('.votes').forEach(box => {
   let k = 0;
   (box.dataset.groups || '').split(',').filter(Boolean).forEach((g, gi) => {
     const [label, raw] = g.split(':'), cnt = +val(raw) || 0;
     for (let i = 0; i < cnt; i++) {
-      const v = document.createElement('div'); v.className = 'vote g' + Math.min(gi, 1); v.textContent = label;
+      const v = document.createElement('div'); v.className = 'vote g' + Math.min(gi, 2); v.textContent = label;
       v.style.setProperty('--d', (.6 + k++ * .035).toFixed(2) + 's'); box.appendChild(v);
     }
   });
@@ -225,7 +225,7 @@ const FX = (() => {
           const i = o + j, u = reduce ? s1[i] : (s1[i] + t * sp * (.7 + s2[i] * .6)) % 1;
           const a = fn(u), b = fn(Math.min(1, u + .002));
           let nx = -(b[1] - a[1]), ny = b[0] - a[0]; const L = Math.hypot(nx, ny) || 1; nx /= L; ny /= L;
-          const off = G() * 0 + (s3[i] - .5) * 14;
+          const off = (s3[i] - .5) * 14;
           tx[i] = a[0] + nx * off; ty[i] = a[1] + ny * off;
           const edge = Math.min(1, u / .05, (1 - u) / .05);
           ta[i] = al * edge * (.55 + .45 * (1 - Math.abs(s3[i] - .5) * 2)); ts[i] = .9; tc[i] = col;
@@ -654,6 +654,7 @@ const help = document.getElementById('help');
 function fullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
 /* ---------- theme & accent on the fly (T / A): for a bright room or a quick look; the file keeps its own setting ---------- */
 const ACCENTS = ['terracotta', 'blue', 'violet', 'green', 'amber', 'rose', 'mono'];
+const OWN_ACCENT = !document.documentElement.dataset.accent;  // brand colour from deck.html <style>: A cannot override it
 const ACCENT_RU = { terracotta: 'терракота', blue: 'синий', violet: 'фиолетовый', green: 'зелёный', amber: 'янтарь', rose: 'розовый', mono: 'монохром' };
 function applyTheme(msg) { readTheme(); FX.recolor(); toast(msg + ' · до перезагрузки'); }
 function switchTheme() {
@@ -662,6 +663,7 @@ function switchTheme() {
   applyTheme(light ? 'Светлая тема' : 'Тёмная тема');
 }
 function switchAccent() {
+  if (OWN_ACCENT) { toast('Свой цвет бренда — A его не меняет'); return; }
   const el = document.documentElement, i = ACCENTS.indexOf(el.dataset.accent || 'terracotta');
   el.dataset.accent = ACCENTS[(i + 1) % ACCENTS.length];
   applyTheme('Акцент: ' + ACCENT_RU[el.dataset.accent]);
@@ -683,8 +685,8 @@ function onKey(e) {
   else if (k === 'Escape') help.classList.remove('on');
 }
 document.addEventListener('keydown', onKey);
-document.getElementById('next').addEventListener('click', next);
-document.getElementById('prev').addEventListener('click', prev);
+document.getElementById('next')?.addEventListener('click', next);
+document.getElementById('prev')?.addEventListener('click', prev);
 let idleT = 0;
 addEventListener('mousemove', () => {
   document.body.classList.remove('idle'); document.body.classList.add('moved');

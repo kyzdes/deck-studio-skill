@@ -13,7 +13,32 @@ import re
 import shutil
 import sys
 
-ACCENTS = ("terracotta", "blue", "violet", "green", "amber", "rose", "mono")
+BG_DARK, BG_LIGHT = "#07080b", "#f4f1ea"  # --bg тёмной и светлой темы в engine.css
+
+
+def accents():
+    js = (TEMPLATE / "src" / "engine.js").read_text(encoding="utf-8")
+    return re.findall(r"'(\w+)'", js.split("const ACCENTS = [", 1)[1].split("]", 1)[0])
+
+
+def contrast(a, b):
+    def lum(h):
+        c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    hi, lo = sorted((lum(a), lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def readable(color, bg, toward):
+    """Смешивает цвет с белым или чёрным, пока мелкий текст не станет читаемым на фоне (4,5:1)."""
+    rgb, t = [int(color[i:i + 2], 16) for i in (1, 3, 5)], int(toward[1:3], 16)
+    for step in range(21):
+        f = step / 20
+        out = "#" + "".join(f"{round(c + (t - c) * f):02x}" for c in rgb)
+        if contrast(out, bg) >= 4.5:
+            return out
+    return toward
 
 SKILL = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL / "assets" / "template"
@@ -30,8 +55,9 @@ def main():
     ap.add_argument("--force", action="store_true", help="перезаписать src/, если уже есть")
     a = ap.parse_args()
     custom = re.fullmatch(r"#[0-9a-fA-F]{6}", a.accent)
-    if a.accent not in ACCENTS and not custom:
-        sys.exit(f"--accent: один из {', '.join(ACCENTS)} или цвет #rrggbb")
+    names = accents()
+    if a.accent not in names and not custom:
+        sys.exit(f"--accent: один из {', '.join(names)} или цвет #rrggbb")
 
     dest = pathlib.Path(a.dest).expanduser().resolve()
     src = dest / "src"
@@ -49,7 +75,10 @@ def main():
     html = html.replace('data-theme="dark"', f'data-theme="{a.theme}"', 1)
     if custom:
         html = html.replace(' data-accent="terracotta"', "", 1)
-        html = html.replace("</style>\n</head>", f":root {{ --accent: {a.accent}; }}  /* свой акцент; для светлой темы возьмите оттенок темнее */\n</style>\n</head>", 1)
+        dark, light = readable(a.accent.lower(), BG_DARK, "#ffffff"), readable(a.accent.lower(), BG_LIGHT, "#000000")
+        brand = (f":root {{ --accent: {dark}; }}  /* свой акцент {a.accent}, подогнан до контраста 4,5:1 */\n"
+                 f"[data-theme=\"light\"] {{ --accent: {light}; }}\n")
+        html = html.replace("</style>\n</head>", brand + "</style>\n</head>", 1)
     else:
         html = html.replace('data-accent="terracotta"', f'data-accent="{a.accent}"', 1)
     deck.write_text(html, encoding="utf-8")

@@ -4,6 +4,7 @@
     python3 make_fonts.py <папка деки> "Cormorant Garamond:ital,wght@0,500;0,600;1,500" "Inter Tight:wght@300;400;500" "JetBrains Mono:wght@400;500"
 
 Нужен интернет. Семейства и оси — как в адресе fonts.googleapis.com/css2.
+Файл пишется заново: перечислите ВСЕ семейства деки, иначе пропущенные заменит системный шрифт.
 После замены шрифтов поправьте --serif / --sans / --mono в deck.html (references/themes.md).
 """
 import base64
@@ -47,6 +48,12 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(faces), encoding="utf-8")
     print(out, len(faces), "faces,", len(cache), "files,", round(out.stat().st_size / 1e3), "KB")
+    families = sorted({f for f, *_ in merged})
+    print("  в файле:", ", ".join(families), "— остальные семейства деки упадут на системный шрифт")
+    cyr = {re.search(r"font-family: '([^']+)'", b).group(1) for sub, b in re.findall(r"/\* ([\w-]+) \*/\s*@font-face \{(.*?)\}", css, re.S) if sub == "cyrillic"}
+    for fam in families:
+        if fam not in cyr:
+            print(f"  ! у «{fam}» нет кириллицы: русский текст покажется системным шрифтом")
 
 
 if __name__ == "__main__":
