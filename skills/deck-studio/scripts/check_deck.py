@@ -56,6 +56,7 @@ def main():
 
     m = re.search(r"DECK_CONFIG\s*=\s*\{[^}]*minutes:\s*([\d.]+)", src)
     target = a.minutes or (float(m.group(1)) if m else 20)
+    particles = not re.search(r"DECK_CONFIG\s*=\s*\{[^}]*particles:\s*false", src)
     data_keys, nulls = deck_data(src)
     shapes = set(re.findall(r"^\s{2}([A-Za-z_]\w*)\s*:\s*\{\s*$", src.split("window.DECK_SHAPES", 1)[1].split("</script>", 1)[0], re.M)) if "window.DECK_SHAPES" in src else set()
 
@@ -79,7 +80,7 @@ def main():
         steps = max([int(x) for x in re.findall(r'data-step="(\d+)"', body)] or [0])
         tmatch = re.search(r'<(h1|h2|blockquote)[^>]*class="[^"]*\b(t|quote)\b[^"]*"[^>]*>(.*?)</\1>', body, re.S)
         title = strip(tmatch.group(3)) if tmatch else "—"
-        for spec in fx.split("|"):
+        for spec in fx.split("|") if particles else []:
             name, _, args = spec.partition("@")
             if name not in KNOWN_FX:
                 print(f"  ! слайд {i}: неизвестная формация «{name}»"); problems += 1
@@ -118,7 +119,9 @@ def main():
     if abs(total - target * 60) > 30:
         print("  ! сумма data-time расходится с целью больше чем на 30 секунд"); problems += 1
 
-    for (i, *_, fx_a, _t, _q), (j, *_, fx_b, _t2, _q2) in zip(rows, rows[1:]):
+    if not particles:
+        print("Частицы выключены (DECK_CONFIG.particles: false): формации не проверяются")
+    for (i, *_, fx_a, _t, _q), (j, *_, fx_b, _t2, _q2) in zip(rows, rows[1:]) if particles else []:
         last, first = fx_a.split("|")[-1], fx_b.split("|")[0]
         if last == first:
             print(f"  ~ слайды {i} → {j}: одна формация «{first}», переход частиц не виден")

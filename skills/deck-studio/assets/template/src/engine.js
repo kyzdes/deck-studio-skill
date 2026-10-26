@@ -4,7 +4,7 @@
 (() => {
 'use strict';
 const D = window.DECK_DATA || {};
-const CFG = Object.assign({ minutes: 20, locale: 'ru-RU' }, window.DECK_CONFIG || {});
+const CFG = Object.assign({ minutes: 20, locale: 'ru-RU', particles: true }, window.DECK_CONFIG || {});
 const stage = document.getElementById('stage');
 const slides = [...document.querySelectorAll('.slide')];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -506,7 +506,8 @@ const FX = (() => {
   }
   addEventListener('resize', resize);
   resize();
-  requestAnimationFrame(frame);
+  if (CFG.particles) requestAnimationFrame(frame);
+  else cv.style.display = 'none';  // strict brand themes: no particle field, nothing computed per frame
   return { set, resize, recolor };
 })();
 

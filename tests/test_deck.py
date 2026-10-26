@@ -54,6 +54,15 @@ class DeckTest(unittest.TestCase):
         for leftover in ('src="assets/', "<script src=", '<link rel="stylesheet" href='):
             self.assertNotIn(leftover, out)
 
+    def test_particles_off_skips_formations(self):
+        html = self.make()
+        self.edit(html, "window.DECK_CONFIG = { minutes: 20", "window.DECK_CONFIG = { particles: false, minutes: 20")
+        self.edit(html, 'data-fx="sphere"', 'data-fx="nonexistent"')
+        r = self.check()
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertIn("Частицы выключены", r.stdout)
+        self.assertNotIn("одна формация", r.stdout)
+
     def test_slide_with_extra_class_is_counted(self):
         html = self.make()
         self.edit(html, '<section class="slide" data-fx="burst"', '<section class="slide quote-slide" data-fx="burst"')
