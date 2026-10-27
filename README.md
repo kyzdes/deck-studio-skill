@@ -16,7 +16,8 @@
 | `references/copy-rules.md` | сюжетная дуга доклада, правила заголовков, вычитка агентом, сообщение в чат |
 | `references/layouts.md` | каталог 20 макетов: когда какой брать, координаты сцены, рецепты |
 | `references/particles.md` | формации частиц, встроенные фигуры, свои фигуры через `DECK_SHAPES` |
-| `references/themes.md` | светлая и тёмная темы, семь акцентов, цвет бренда, токены, шрифты |
+| `references/themes.md` | светлая и тёмная темы, семь акцентов, цвет бренда, токены, шрифты, стиль «Сетка» |
+| `assets/styles/grid/` | стиль «Сетка»: светлая корпоративная дека без частиц, 16 макетов (`new_deck.py --style grid`) |
 | `references/gotchas.md` | проверка в браузере, вёрстка, окно заметок, сцена |
 | `assets/template/src/` | движок (`engine.js`, `engine.css`), каталог-дека на 20 слайдов, сборщик, шрифты |
 | `assets/moodboard/` | шаблон мудборда на три направления |
@@ -39,6 +40,8 @@
 
 ```
 python3 skills/deck-studio/scripts/new_deck.py ~/Desktop/my-talk --title "Мой доклад" --minutes 15 --theme light --accent blue
+# или корпоративная «Сетка» без частиц:
+python3 skills/deck-studio/scripts/new_deck.py ~/Desktop/my-talk --style grid --title "Мой доклад"
 python3 ~/Desktop/my-talk/src/build.py
 open ~/Desktop/my-talk/index.html
 ```

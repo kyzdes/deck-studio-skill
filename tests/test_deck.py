@@ -105,5 +105,21 @@ class DeckTest(unittest.TestCase):
         self.assertEqual(self.check().returncode, 0)
 
 
+    def test_grid_style_passes_check_and_builds(self):
+        html = self.make("--style", "grid", "--accent", "#12a4b8", "--title", "Сетка")
+        s = html.read_text(encoding="utf-8")
+        self.assertIn("<title>Сетка</title>", s)
+        self.assertIn('[data-theme="light"] { --accent:', s)
+        r = self.check()
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertIn("Слайдов: 16", r.stdout)
+        b = run(self.deck / "src" / "build.py")
+        self.assertEqual(b.returncode, 0, b.stdout + b.stderr)
+        self.make("--style", "grid", "--accent", "green", "--force")
+        self.assertIn('data-accent="green"', html.read_text(encoding="utf-8"))
+        self.make("--style", "grid", "--force")
+        self.assertIn('data-accent="violet"', html.read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -1,7 +1,10 @@
 """Разворачивает новую презентацию из шаблона deck-studio.
 
-    python3 new_deck.py <папка> [--title "Название"] [--minutes 20]
+    python3 new_deck.py <папка> [--title "Название"] [--minutes 20] [--style particles|grid]
                         [--theme dark|light] [--accent terracotta|blue|violet|green|amber|rose|mono|#hex] [--force]
+
+--style grid — светлая «Сетка» без поля частиц (assets/styles/grid): --theme для неё не действует,
+--accent задаёт цвет данных.
 
 В папке появятся src/ (deck.html, engine.css, engine.js, fonts/, assets/, build.py)
 и copy.md — заготовка текстов. Дальше: правите src/deck.html, собираете
@@ -42,6 +45,7 @@ def readable(color, bg, toward):
 
 SKILL = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL / "assets" / "template"
+STYLES = SKILL / "assets" / "styles"
 COPY_TEMPLATE = SKILL / "assets" / "copy-template.md"
 
 
@@ -50,10 +54,12 @@ def main():
     ap.add_argument("dest")
     ap.add_argument("--title", default="Название презентации")
     ap.add_argument("--minutes", type=int, default=20)
+    ap.add_argument("--style", choices=("particles", "grid"), default="particles", help="grid — светлая «Сетка» без частиц")
     ap.add_argument("--theme", choices=("dark", "light"), default="dark")
-    ap.add_argument("--accent", default="terracotta", help="готовый акцент или свой цвет #rrggbb")
+    ap.add_argument("--accent", help="готовый акцент или свой цвет #rrggbb; по умолчанию terracotta, у «Сетки» violet")
     ap.add_argument("--force", action="store_true", help="перезаписать src/, если уже есть")
     a = ap.parse_args()
+    a.accent = a.accent or ("violet" if a.style == "grid" else "terracotta")
     custom = re.fullmatch(r"#[0-9a-fA-F]{6}", a.accent)
     names = accents()
     if a.accent not in names and not custom:
@@ -67,6 +73,8 @@ def main():
     if src.exists():
         shutil.rmtree(src)
     shutil.copytree(TEMPLATE / "src", src)
+    if a.style != "particles":
+        shutil.copy(STYLES / a.style / "deck.html", src / "deck.html")
 
     deck = src / "deck.html"
     html = deck.read_text(encoding="utf-8")
@@ -74,21 +82,22 @@ def main():
     html = re.sub(r"window\.DECK_CONFIG = \{ minutes: \d+", f"window.DECK_CONFIG = {{ minutes: {a.minutes}", html, count=1)
     html = html.replace('data-theme="dark"', f'data-theme="{a.theme}"', 1)
     if custom:
-        html = html.replace(' data-accent="terracotta"', "", 1)
+        html = re.sub(r' data-accent="\w+"', "", html, count=1)
         dark, light = readable(a.accent.lower(), BG_DARK, "#ffffff"), readable(a.accent.lower(), BG_LIGHT, "#000000")
         brand = (f":root {{ --accent: {dark}; }}  /* свой акцент {a.accent}, подогнан до контраста 4,5:1 */\n"
                  f"[data-theme=\"light\"] {{ --accent: {light}; }}\n")
         html = html.replace("</style>\n</head>", brand + "</style>\n</head>", 1)
     else:
-        html = html.replace('data-accent="terracotta"', f'data-accent="{a.accent}"', 1)
+        html = re.sub(r'data-accent="\w+"', f'data-accent="{a.accent}"', html, count=1)
     deck.write_text(html, encoding="utf-8")
 
     copy_md = dest / "copy.md"
     if not copy_md.exists():
         copy_md.write_text(COPY_TEMPLATE.read_text(encoding="utf-8").replace("{{TITLE}}", a.title).replace("{{MINUTES}}", str(a.minutes)), encoding="utf-8")
 
-    print(f"Готово: {dest} · тема {a.theme} · акцент {a.accent}")
-    print("  src/deck.html — слайды и DECK_DATA (сейчас там каталог из 20 демо-макетов: оставьте нужные)")
+    theme = "светлая «Сетка»" if a.style == "grid" else a.theme
+    print(f"Готово: {dest} · тема {theme} · акцент {a.accent}")
+    print(f"  src/deck.html — слайды и DECK_DATA (сейчас там каталог из {16 if a.style == 'grid' else 20} демо-макетов: оставьте нужные)")
     print("  copy.md       — тексты и заметки, держите в синхроне с deck.html")
     print(f"  сборка:  cd '{dest}' && python3 src/build.py")
     print(f"  проверка: python3 '{SKILL / 'scripts' / 'check_deck.py'}' '{dest}'")

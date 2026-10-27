@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ru" data-theme="light" data-accent="violet">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Название презентации</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="engine.css">
+<style>
+/* Стиль «Сетка»: светлая бумага, видимая сетка 160×120, моно-подписи в скобках, карточки с метками по углам,
+   пиксельная мозаика и стрелки-векторы вместо поля частиц. Всегда светлый.
+   Цвета: --accent (data-accent на <html> или свой #hex через new_deck.py) — данные и акцентные слова;
+   --y — выделение маркером, одна главная вещь на слайде. */
+html[data-theme] {
+  --bg: #F5F5F2; --ink: #121214; --muted: #6A6A75; --faint: #A7A7B0; --body: #2E2E35; --body-hi: #121214;
+  --line: rgba(18,18,20,.12); --line-2: rgba(18,18,20,.22); --grid: rgba(18,18,20,.055); --caption: #63636E;
+  --panel: #FFFFFF; --panel-solid: #FFFFFF; --on-accent: #fff; --glow-1: transparent; --glow-2: transparent;
+  --y: #FFDC3C; --v: var(--accent);
+  --lav: color-mix(in srgb, var(--accent) 38%, #fff); --lav-2: color-mix(in srgb, var(--accent) 14%, #fff);
+}
+#fx, #glow { display: none; }
+html, body { background: var(--bg); }
+
+/* сетка на каждом слайде, линия под шапкой, перекрестия .x */
+.stage::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 160px 120px; }
+.chrome::before { content: ""; position: absolute; left: 0; right: 0; top: 120px; height: 1px; background: var(--line); }
+.chrome .act, .chrome .count { top: 52px; font: 500 18px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.chrome .act { left: 160px; } .chrome .count { right: 160px; }
+.chrome .act::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 14px; background: var(--y); vertical-align: -1px; }
+.chrome .bar { left: 160px; right: 160px; bottom: 60px; height: 1px; background: var(--line-2); }
+.chrome .bar i { background: var(--ink); height: 3px; top: -1px; }
+.x { position: absolute; width: 15px; height: 15px; margin: -7px 0 0 -7px; }
+.x::before, .x::after { content: ""; position: absolute; background: var(--ink); }
+.x::before { left: 7px; top: 0; width: 1px; height: 15px; } .x::after { top: 7px; left: 0; height: 1px; width: 15px; }
+
+/* типографика */
+.t { font-family: var(--sans); font-weight: 500; letter-spacing: -.04em; line-height: 1.0; margin-top: 0; color: var(--ink); }
+.t em { font-style: normal; color: var(--v); }
+.t mark { background: var(--y); color: var(--ink); padding: 0 .12em; margin: 0 -.04em; }
+.t-xxl { font-size: 200px; line-height: .92; letter-spacing: -.055em; }
+.t-l { font-size: 104px; } .t-m { font-size: 84px; }
+.ml { font: 500 19px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.ml b { color: var(--ink); font-weight: 500; }
+.lead { font: 400 32px/1.4 var(--sans); color: var(--muted); }
+.lead b { color: var(--ink); font-weight: 500; }
+.foot { position: absolute; left: 160px; top: 990px; font: 500 16px/1.4 var(--mono); letter-spacing: .06em; color: var(--caption); text-transform: uppercase; }
+.side { position: absolute; left: 160px; width: 300px; }
+
+/* проявление из размытия */
+.pull { opacity: 0; filter: blur(22px); transition: opacity 1.1s var(--ease), filter 1.6s var(--ease); transition-delay: var(--d, 0s); }
+.slide.active .pull { opacity: 1; filter: none; }
+
+/* ячейки с метками по углам: .c + .y (выделение) / .v (акцент) / .k (графит) */
+.grid { position: absolute; display: grid; gap: 0; }
+.c { position: relative; background: var(--panel); border: 1px solid var(--line); padding: 36px 38px; margin: -1px 0 0 -1px; }
+.c::before, .c::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--ink); border-style: solid; }
+.c::before { left: -1px; top: -1px; border-width: 2px 0 0 2px; } .c::after { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; }
+.c .ml { display: block; margin-bottom: 26px; }
+.c h3 { font: 500 38px/1.1 var(--sans); letter-spacing: -.025em; }
+.c p { margin-top: 16px; font: 400 26px/1.4 var(--sans); color: var(--body); }
+.c .big { font: 400 150px/1 var(--sans); letter-spacing: -.06em; margin-top: 30px; }
+.c.y { background: var(--y); } .c.y .ml { color: #4a4320; }
+.c.v { background: var(--v); color: #fff; } .c.v .ml { color: rgba(255,255,255,.72); } .c.v p { color: rgba(255,255,255,.88); } .c.v::before, .c.v::after { border-color: #fff; }
+.c.k { background: var(--ink); color: #fff; } .c.k .ml { color: var(--faint); } .c.k p { color: rgba(255,255,255,.8); }
+
+/* мозаика: ячейки разных цветов, в конце остаётся одна (.hit). .auto — сама; иначе — по клику на .go-focus */
+.mosaic { position: absolute; display: grid; }
+.mosaic i { border: 1px solid rgba(18,18,20,.08); margin: -1px 0 0 -1px; background: var(--c, transparent);
+  opacity: 0; transform: scale(.6); transition: opacity .7s ease, transform .9s var(--ease), background .9s ease; transition-delay: var(--dl, 0s); }
+.slide.active .mosaic i { opacity: 1; transform: none; }
+.slide:has(.go-focus.shown) .mosaic i:not(.hit) { background: transparent; transition-delay: calc(var(--dl, 0s) * .5); }
+.slide.active .mosaic.auto i:not(.hit) { animation: off .9s ease forwards; animation-delay: calc(2.2s + var(--dl, 0s) * .8); }
+@keyframes off { to { background: transparent; } }
+.mosaic i.hit { --c: var(--y); }
+.slide:has(.go-focus.shown) .mosaic i.hit, .slide.active .mosaic.auto i.hit { background: var(--y); animation: pulse 2.4s ease-in-out 2s infinite; }
+@keyframes pulse { 50% { background: color-mix(in srgb, var(--y) 60%, #fff); } }
+.go-focus, .go-vec, .go-badge { position: absolute; width: 1px; height: 1px; }
+
+/* колонки с крупными цифрами */
+.years { position: absolute; left: 160px; right: 160px; top: 480px; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line-2); }
+.yr { padding: 30px 30px 0 0; border-right: 1px solid var(--line); min-height: 440px; position: relative; }
+.yr + .yr { padding-left: 30px; } .yr:last-child { border-right: 0; }
+.yr .ml { display: block; }
+.yr .num { margin-top: 22px; font: 400 150px/1 var(--sans); letter-spacing: -.06em; }
+.yr .what { margin-top: 6px; font: 500 19px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.yr p { margin-top: 18px; font: 400 24px/1.38 var(--sans); color: var(--body); }
+.yr .pix { position: absolute; left: 0; right: 30px; bottom: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.yr + .yr .pix { left: 30px; }
+.yr .pix i { width: 22px; height: 22px; background: var(--v); }
+.yr.now { background: var(--y); margin-top: -1px; padding-right: 30px; }
+.yr.now .ml { color: #4a4320; }
+.yr.now .pix i { width: 70px; height: 70px; background: var(--ink); }
+
+/* цитаты строками */
+.qrow { position: absolute; left: 640px; right: 160px; display: grid; }
+.qrow > div { padding: 34px 0; border-top: 1px solid var(--line-2); }
+.qrow > div:last-child { border-bottom: 1px solid var(--line-2); }
+.qrow .q { font: 500 54px/1.12 var(--sans); letter-spacing: -.03em; }
+.qrow .ml { display: block; margin-top: 16px; }
+.qrow .q mark { background: var(--y); padding: 0 .08em; }
+
+/* векторы: --a — угол до клика; по клику .go-vec все смотрят вправо, полоса суммы растёт */
+.vecs { position: absolute; left: 160px; right: 160px; top: 480px; height: 360px; display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+.vec { position: relative; border-right: 1px solid var(--line); } .vec:last-child { border-right: 0; }
+.vec .arr { position: absolute; left: 40%; top: 55%; width: 140px; height: 4px; margin-top: -2px; background: var(--ink);
+  transform-origin: 0 50%; transform: rotate(var(--a)); transition: transform 1.6s var(--ease), background .8s; transition-delay: var(--dl); }
+.vec .arr::after { content: ""; position: absolute; right: -6px; top: -9px; border: 11px solid transparent; border-left: 18px solid var(--ink); border-right: 0; transition: border-color .8s; transition-delay: var(--dl); }
+.vec .arr::before { content: ""; position: absolute; left: -7px; top: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); }
+.vec .ml { position: absolute; left: 24px; top: 22px; }
+.slide:has(.go-vec.shown) .vec .arr { transform: rotate(0deg); background: var(--v); }
+.slide:has(.go-vec.shown) .vec .arr::after { border-left-color: var(--v); }
+.sumrow { position: absolute; left: 160px; right: 160px; top: 880px; height: 60px; }
+.sumrow .ml { position: absolute; left: 0; top: 0; }
+.sumrow .tr { position: absolute; left: 330px; right: 0; top: 4px; height: 14px; background: var(--lav-2); }
+.sumrow .tr i { position: absolute; left: 0; top: 0; bottom: 0; width: 2%; background: var(--ink); transition: width 2s var(--ease) .8s, background .8s .8s; }
+.slide:has(.go-vec.shown) .sumrow .tr i { width: 100%; background: var(--y); }
+
+/* нумерованные строки */
+.rows { position: absolute; left: 640px; right: 160px; list-style: none; }
+.rows li { display: grid; grid-template-columns: 110px 1fr; padding: 28px 0; border-top: 1px solid var(--line-2); font: 400 32px/1.3 var(--sans); color: var(--body); }
+.rows li:last-child { border-bottom: 1px solid var(--line-2); }
+.rows li b { display: block; font-weight: 500; color: var(--ink); font-size: 40px; letter-spacing: -.02em; margin-bottom: 6px; }
+.pillno { display: inline-block; height: 40px; padding: 0 14px; border: 1px solid var(--ink); border-radius: 20px; font: 500 18px/38px var(--mono); letter-spacing: .08em; align-self: start; justify-self: start; margin-top: 6px; }
+
+/* бейджи: .old на месте, .new ложится поверх по клику */
+.badge { position: absolute; width: 540px; height: 400px; padding: 46px; border: 1px solid var(--line-2); transition: transform 1.4s var(--ease), opacity 1s, filter 1.2s; }
+.badge::before, .badge::after { content: ""; position: absolute; width: 18px; height: 18px; border: 0 solid var(--ink); }
+.badge::before { left: -1px; top: -1px; border-width: 2px 0 0 2px; } .badge::after { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; }
+.badge .ml { display: block; }
+.badge strong { display: block; margin-top: 70px; font: 500 56px/1.02 var(--sans); letter-spacing: -.035em; }
+.badge p { margin-top: 22px; font: 400 26px/1.4 var(--sans); color: var(--muted); }
+.badge .id { position: absolute; right: 46px; top: 46px; font: 500 18px/1 var(--mono); letter-spacing: .1em; color: var(--muted); }
+.badge.old { background: #fff; }
+.badge.new { background: var(--y); }
+.badge.new p, .badge.new .ml, .badge.new .id { color: #4a4320; }
+.slide:has(.go-badge.shown) .badge.old { transform: translate(-70px, 50px) rotate(-6deg) scale(.94); opacity: .35; filter: blur(4px); }
+.badge.new[data-step] { transform: translate(110px, -30px) rotate(4deg); }
+.badge.new[data-step].shown { transform: rotate(-2deg); }
+
+/* вопросы с пропуском */
+.qs { position: absolute; left: 160px; right: 160px; top: 400px; display: grid; }
+.qq { display: grid; grid-template-columns: 160px 1fr 420px; align-items: start; padding: 34px 0; border-top: 1px solid var(--line-2); }
+.qq:last-child { border-bottom: 1px solid var(--line-2); }
+.qq .k { font: 400 96px/.9 var(--sans); letter-spacing: -.05em; color: var(--v); }
+.qq h3 { font: 500 46px/1.12 var(--sans); letter-spacing: -.025em; }
+.qq h3 u { text-decoration: none; display: inline-block; min-width: 240px; border-bottom: 4px solid var(--y); }
+.qq p { font: 400 25px/1.4 var(--sans); color: var(--muted); padding-left: 40px; border-left: 1px solid var(--line); }
+
+/* мини-слайды */
+.mocks { position: absolute; left: 160px; right: 160px; top: 520px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+.mock { aspect-ratio: 16 / 10; background: #fff; border: 1px solid var(--line-2); padding: 30px 32px; position: relative; }
+.mock .ml { font-size: 16px; }
+.mock h4 { margin-top: 18px; font: 500 32px/1.1 var(--sans); letter-spacing: -.02em; }
+.mock .ln { height: 10px; background: var(--lav-2); margin-top: 14px; } .mock .ln.s { width: 60%; }
+.mock.say { background: var(--ink); color: #fff; border-color: var(--ink); } .mock.say .ml { color: var(--y); }
+.mock.say .ln { background: rgba(255,255,255,.2); }
+.mock .bars { position: absolute; left: 32px; right: 32px; bottom: 28px; display: flex; gap: 10px; align-items: flex-end; height: 70px; }
+.mock .bars i { flex: 1; background: var(--lav); } .mock .bars i:last-child { background: var(--v); }
+.mock .tick { position: absolute; right: 18px; top: 18px; width: 18px; height: 18px; background: var(--y); }
+
+/* чек-лист */
+.checks { position: absolute; list-style: none; }
+.checks li { display: grid; grid-template-columns: 70px 1fr; padding: 24px 0; border-top: 1px solid var(--line-2); font: 400 32px/1.3 var(--sans); color: var(--body); }
+.checks li:last-child { border-bottom: 1px solid var(--line-2); }
+.checks li b { color: var(--ink); font-weight: 500; }
+.checks li::before { content: ""; width: 26px; height: 26px; margin-top: 6px; background: var(--y); outline: 1px solid var(--ink); outline-offset: 4px; }
+
+/* диалог: data-k — кто говорит */
+.dlg { position: absolute; left: 640px; right: 160px; }
+.dlg p { padding: 28px 0; border-top: 1px solid var(--line-2); font: 500 54px/1.12 var(--sans); letter-spacing: -.03em; display: grid; grid-template-columns: 110px 1fr; }
+.dlg p::before { content: attr(data-k); font: 500 19px/2.6 var(--mono); letter-spacing: .12em; color: var(--muted); }
+.dlg p:last-child { border-bottom: 1px solid var(--line-2); }
+.dlg p.hl span { background: var(--y); }
+</style>
+</head>
+<body>
+
+<script>
+/* ======================================================================
+   НАСТРОЙКИ И ДАННЫЕ. Стиль «Сетка» работает без поля частиц.
+   ====================================================================== */
+window.DECK_CONFIG = { minutes: 20, locale: 'ru-RU', particles: false };
+window.DECK_DATA = {};
+</script>
+
+<canvas id="fx"></canvas>
+<div id="glow"></div>
+
+<div class="stage" id="stage">
+  <div class="chrome">
+    <div class="act" id="act"></div>
+    <div class="count" id="count"></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+
+  <!-- 1 · Обложка: заголовок слева, колонка справа, мозаика сама гаснет до одной ячейки -->
+  <section class="slide" data-act="Повод · дата" data-time="1:15">
+    <h1 class="t t-xxl abs" data-a="words" data-d=".2" style="left:150px;top:190px;width:1200px">Название <em>доклада</em></h1>
+    <div class="abs up" style="left:1440px;top:240px;width:320px;--d:1s"><div class="ml">Подзаголовок</div><p class="lead" style="margin-top:22px;font-size:28px">Одна фраза о том, зачем зал здесь сегодня</p></div>
+    <div class="mosaic auto" data-cols="10" data-rows="3" data-fill=".62" data-hit="17" style="left:160px;top:640px;width:1600px;height:320px;grid-template-columns:repeat(10,1fr)"></div>
+    <span class="x" style="left:160px;top:640px"></span><span class="x" style="left:1760px;top:640px"></span><span class="x" style="left:160px;top:960px"></span><span class="x" style="left:1760px;top:960px"></span>
+    <aside class="notes"><p>Обложка. Мозаика (.mosaic.auto) сама гаснет до ячейки data-hit. data-cols × data-rows — размер сетки, data-fill — доля закрашенных ячеек. Перекрестия .x ставятся на углы блока.</p></aside>
+  </section>
+
+  <!-- 2 · Подпись слева + утверждение + три ячейки -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 01 ] Подпись раздела</div>
+    <h2 class="t t-l abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Главная мысль слайда с&nbsp;<mark>выделением</mark></h2>
+    <div class="grid" style="left:160px;right:160px;top:600px;grid-template-columns:repeat(3,1fr)">
+      <div class="c up" style="--d:.9s"><span class="ml">01 · Метка</span><h3>Короткий заголовок</h3><p>Одна строка пояснения простыми словами</p></div>
+      <div class="c up" style="--d:1.05s"><span class="ml">02 · Метка</span><h3>Короткий заголовок</h3><p>Одна строка пояснения простыми словами</p></div>
+      <div class="c y up" style="--d:1.2s"><span class="ml">03 · Метка</span><h3>Главный из трёх</h3><p>Жёлтым — только одна ячейка на слайде</p></div>
+    </div>
+    <aside class="notes"><p>Базовая раскладка стиля: подпись .side в левой колонке, заголовок с 640px. Ячейки .c в .grid; .y — выделение, .v — акцент, .k — графит. Маркер &lt;mark&gt; в заголовке — одно слово.</p></aside>
+  </section>
+
+  <!-- 3 · Колонки с цифрами + последняя по клику -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 02 ] Динамика</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Как менялся показатель <em>по&nbsp;годам</em></h2>
+    <div class="years">
+      <div class="yr up" style="--d:.9s"><span class="ml">2024</span><div class="num">3</div><div class="what">единица</div><p>Что это значит в одной строке</p><div class="pix"><i></i><i></i><i></i></div></div>
+      <div class="yr up" style="--d:1.05s"><span class="ml">2025</span><div class="num">6</div><div class="what">единица</div><p>Что это значит в одной строке</p><div class="pix"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="yr up" style="--d:1.2s"><span class="ml">2026</span><div class="num">11</div><div class="what">единица</div><p>Что это значит в одной строке</p><div class="pix"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="yr now" data-step="1"><span class="ml">2027</span><div class="num">1</div><div class="what">цель</div><p>Вывод появляется по клику</p><div class="pix"><i></i></div></div>
+    </div>
+    <p class="foot up" style="--d:1.5s">Источник и период цифр</p>
+    <aside class="notes"><p>Демо-значения: замените своими. В .pix столько квадратиков, сколько в цифре. Последняя колонка .yr.now — жёлтая, появляется по клику (data-step).</p></aside>
+  </section>
+
+  <!-- 4 · Цитаты строками -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 03 ] Голоса</div>
+    <div class="qrow" style="top:190px">
+      <div class="up" style="--d:.3s"><div class="q">«Цитата из интервью или встречи, одна мысль в две строки»</div><span class="ml">Кто · когда</span></div>
+      <div class="up" style="--d:.8s"><div class="q">«Вторая цитата — короче первой»</div><span class="ml">Кто · когда</span></div>
+      <div class="up" style="--d:1.3s"><div class="q">«Третья цитата с главным <mark>словом</mark>»</div><span class="ml">Кто · когда</span></div>
+    </div>
+    <aside class="notes"><p>Только настоящие цитаты со ссылкой на источник в заметках. Три строки — максимум.</p></aside>
+  </section>
+
+  <!-- 5 · Три цифры-ячейки -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 04 ] Цифры</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Вывод, который следует из&nbsp;<em>трёх цифр</em></h2>
+    <div class="grid" style="left:160px;right:160px;top:480px;grid-template-columns:repeat(3,1fr)">
+      <div class="c up" style="--d:.9s;height:440px"><span class="ml">▸ Показатель</span><div class="big">24</div><p>Подпись: что именно посчитано</p></div>
+      <div class="c up" style="--d:1.05s;height:440px"><span class="ml">▸ Показатель</span><div class="big">9</div><p>Одна цифра — одна подпись</p></div>
+      <div class="c v up" style="--d:1.2s;height:440px"><span class="ml">▸ Показатель</span><div class="big">7</div><p>Главная цифра — в акцентной ячейке</p></div>
+    </div>
+    <p class="foot up" style="--d:1.5s">Источник, период, единица</p>
+    <aside class="notes"><p>Демо-значения. Не объединяйте две цифры в одну ячейку через «/»: зал прочитает как дробь.</p></aside>
+  </section>
+
+  <!-- 6 · Мозаика по клику -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 05 ] Метафора</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Много разных задач, и&nbsp;по&nbsp;клику остаётся <em>одна</em></h2>
+    <div class="mosaic" data-cols="16" data-rows="4" data-fill=".7" data-hit="38" style="left:160px;top:480px;width:1600px;height:400px;grid-template-columns:repeat(16,1fr)"></div>
+    <i class="go-focus" data-step="1"></i>
+    <p class="foot up" style="--d:1s">Подпись под мозаикой</p>
+    <aside class="notes"><p>Мозаика без .auto гаснет по клику: невидимый &lt;i class="go-focus" data-step="1"&gt; включает переход.</p></aside>
+  </section>
+
+  <!-- 7 · Векторы по клику -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 06 ] Сумма векторов</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Пять команд тянут в&nbsp;разные стороны — результат <em>стоит</em></h2>
+    <div class="vecs">
+      <div class="vec" style="--a:-150deg;--dl:0s"><span class="ml">Команда 01</span><div class="arr"></div></div>
+      <div class="vec" style="--a:35deg;--dl:.12s"><span class="ml">Команда 02</span><div class="arr"></div></div>
+      <div class="vec" style="--a:-95deg;--dl:.24s"><span class="ml">Команда 03</span><div class="arr"></div></div>
+      <div class="vec" style="--a:150deg;--dl:.36s"><span class="ml">Команда 04</span><div class="arr"></div></div>
+      <div class="vec" style="--a:80deg;--dl:.48s"><span class="ml">Команда 05</span><div class="arr"></div></div>
+    </div>
+    <div class="sumrow up" style="--d:1s"><span class="ml"><b>Σ</b> Сумма</span><div class="tr"><i></i></div></div>
+    <i class="go-vec" data-step="1"></i>
+    <aside class="notes"><p>Самый сильный слайд стиля в живом показе. До клика стрелки смотрят под углами --a, сумма почти ноль; по клику все разворачиваются в одну сторону, полоса суммы растёт до конца.</p></aside>
+  </section>
+
+  <!-- 8 · Четыре ячейки -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 07 ] Причины</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Четыре причины <em>простыми словами</em></h2>
+    <div class="grid" style="left:160px;right:160px;top:480px;grid-template-columns:repeat(4,1fr)">
+      <div class="c up" style="--d:.9s;height:400px"><span class="ml">01</span><h3>Причина</h3><p>Что происходит и чем это мешает</p></div>
+      <div class="c up" style="--d:1s;height:400px"><span class="ml">02</span><h3>Причина</h3><p>Что происходит и чем это мешает</p></div>
+      <div class="c up" style="--d:1.1s;height:400px"><span class="ml">03</span><h3>Причина</h3><p>Что происходит и чем это мешает</p></div>
+      <div class="c k up" style="--d:1.2s;height:400px"><span class="ml">04</span><h3>Главная причина</h3><p>Графитовая ячейка — для самой важной</p></div>
+    </div>
+    <aside class="notes"><p>Четыре колонки по 400 px. Тексты — до двух строк: ячейка не раздувается.</p></aside>
+  </section>
+
+  <!-- 9 · Определение + три проверки -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 08 ] Определение</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Определение в&nbsp;одну фразу с&nbsp;<mark>главным словом</mark></h2>
+    <div class="grid" style="left:160px;right:160px;top:600px;grid-template-columns:repeat(3,1fr)">
+      <div class="c up" style="--d:1.2s;height:300px"><span class="ml">Проверка 01</span><h3>Короткий признак</h3><p>Как его увидеть</p></div>
+      <div class="c up" style="--d:1.35s;height:300px"><span class="ml">Проверка 02</span><h3>Короткий признак</h3><p>Как его увидеть</p></div>
+      <div class="c up" style="--d:1.5s;height:300px"><span class="ml">Проверка 03</span><h3>Короткий признак</h3><p>Как его увидеть</p></div>
+    </div>
+    <aside class="notes"><p>Слайд-определение: заголовок и три признака, по которым его проверяют.</p></aside>
+  </section>
+
+  <!-- 10 · Смена роли по клику -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 09 ] Роль</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:540px">Сегодня вы — <em>новая роль</em></h2>
+    <p class="lead abs up" style="left:640px;top:640px;width:540px;--d:1.1s">Одно-два предложения о том, за что эта роль отвечает и <b>чем она отличается</b> от обычной.</p>
+    <div class="badge old up" style="left:1220px;top:330px;--d:.5s"><span class="ml">Бейдж</span><span class="id">ID · 01</span><strong>Обычная роль</strong><p>Как зал думает каждый день</p></div>
+    <div class="badge new" data-step="1" style="left:1220px;top:330px"><span class="ml">Бейдж на сегодня</span><span class="id">ID · 02</span><strong>Новая роль</strong><p>Как зал думает сегодня</p></div>
+    <i class="go-badge" data-step="1"></i>
+    <aside class="notes"><p>По клику жёлтый бейдж .new ложится поверх, старый .old размывается. Хорошо для «снимите бейдж своей команды».</p></aside>
+  </section>
+
+  <!-- 11 · Диалог -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side up" style="top:200px;width:380px;--d:.1s"><div class="ml">[ 10 ] Пример</div><div style="margin-top:20px;font:500 44px/1.05 var(--sans);letter-spacing:-.03em">Intel, 1985</div><p class="lead" style="margin-top:18px;font-size:24px">Контекст: Intel начинался с&nbsp;микросхем памяти, к&nbsp;1985 году японские производители отобрали этот рынок</p></div>
+    <div class="dlg" style="top:190px">
+      <p class="up" data-k="ГРОУВ" style="--d:.4s"><span>Если совет директоров нас уволит и&nbsp;наймёт нового CEO, что он сделает?</span></p>
+      <p class="up" data-k="МУР" style="--d:1s"><span>Закроет производство памяти.</span></p>
+      <p class="up hl" data-k="ГРОУВ" style="--d:1.6s"><span>Тогда почему&nbsp;бы нам не&nbsp;сделать это самим?</span></p>
+    </div>
+    <p class="foot up" style="left:640px;--d:2.2s">Чем закончилось — одной строкой</p>
+    <aside class="notes"><p>Диалог: data-k — кто говорит, .hl — главная реплика. Пример — пересказ истории из книги Энди Гроува «Выживают только параноики». Сначала контекст слева, потом реплики, внизу итог.</p></aside>
+  </section>
+
+  <!-- 12 · Нумерованные строки -->
+  <section class="slide" data-act="Раздел" data-time="1:15">
+    <div class="side up" style="top:200px;--d:.1s"><div class="ml">[ 11 ] Правила</div><div style="margin-top:20px;font:500 44px/1.05 var(--sans);letter-spacing:-.03em">Заголовок в&nbsp;левой колонке</div></div>
+    <ul class="rows" style="top:190px">
+      <li class="up" style="--d:.5s"><span class="pillno">01</span><span><b>Правило</b>Одно предложение пояснения</span></li>
+      <li class="up" style="--d:.65s"><span class="pillno">02</span><span><b>Правило</b>Одно предложение пояснения</span></li>
+      <li class="up" style="--d:.8s"><span class="pillno">03</span><span><b>Правило</b>Одно предложение пояснения</span></li>
+      <li class="up" style="--d:.95s"><span class="pillno">04</span><span><b>Правило</b>Одно предложение пояснения</span></li>
+    </ul>
+    <aside class="notes"><p>Строки с номерами в овалах; влезает четыре, пятая — уже мелко.</p></aside>
+  </section>
+
+  <!-- 13 · Вопросы с пропуском по клику -->
+  <section class="slide" data-act="Задание" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 12 ] Задание</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Каждая команда отвечает на&nbsp;<em>три вопроса</em></h2>
+    <div class="qs">
+      <div class="qq up" style="--d:.8s"><div class="k">01</div><h3>Первый вопрос с&nbsp;пропуском <u>&nbsp;</u></h3><p>Подсказка: в каком виде нужен ответ</p></div>
+      <div class="qq" data-step="1"><div class="k">02</div><h3>Второй вопрос — <u>1, 2, 3</u></h3><p>Подсказка: в каком виде нужен ответ</p></div>
+      <div class="qq" data-step="2"><div class="k">03</div><h3>Третий вопрос — <u>1, 2, 3, 4, 5</u></h3><p>Подсказка: в каком виде нужен ответ</p></div>
+    </div>
+    <aside class="notes"><p>Вопросы открываются по одному. Пропуск — &lt;u&gt; с жёлтой чертой.</p></aside>
+  </section>
+
+  <!-- 14 · Мини-слайды -->
+  <section class="slide" data-act="Задание" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 13 ] Формат</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Что принести: рассказ и&nbsp;<em>2–3 слайда</em></h2>
+    <div class="mocks">
+      <div class="mock say up" style="--d:.9s"><span class="ml">Рассказ</span><h4>О чём говорить</h4><div class="ln"></div><div class="ln s"></div></div>
+      <div class="mock up" style="--d:1.05s"><span class="tick"></span><span class="ml">Слайд 01</span><h4>Главная мысль</h4><div class="ln"></div><div class="ln s"></div></div>
+      <div class="mock up" style="--d:1.2s"><span class="ml">Слайд 02</span><h4>Цифры</h4><div class="bars"><i style="height:35%"></i><i style="height:60%"></i><i style="height:100%"></i></div></div>
+      <div class="mock up" style="--d:1.35s"><span class="ml">Слайд 03</span><h4>Что нужно</h4><div class="ln"></div><div class="ln"></div><div class="ln s"></div></div>
+    </div>
+    <p class="foot up" style="--d:1.5s">Сноска к формату</p>
+    <aside class="notes"><p>Макеты слайдов, которые нужно подготовить: тёмный — рассказ, белые — слайды.</p></aside>
+  </section>
+
+  <!-- 15 · Чек-лист + жёлтая ячейка -->
+  <section class="slide" data-act="Задание" data-time="1:15">
+    <div class="side ml up" style="top:200px;--d:.1s">[ 14 ] Проверка</div>
+    <h2 class="t t-m abs" data-a="words" data-d=".2" style="left:640px;top:180px;width:1120px">Как понять, что ответ <em>готов</em></h2>
+    <ul class="checks" style="left:640px;top:420px;width:560px">
+      <li class="up" style="--d:.9s"><span><b>Пункт</b> — короткий критерий</span></li>
+      <li class="up" style="--d:1s"><span><b>Пункт</b> — короткий критерий</span></li>
+      <li class="up" style="--d:1.1s"><span><b>Пункт</b> — короткий критерий</span></li>
+      <li class="up" style="--d:1.2s"><span><b>Пункт</b> — короткий критерий</span></li>
+    </ul>
+    <div class="c y up" style="position:absolute;left:1280px;top:420px;width:480px;height:480px;--d:1.4s"><span class="ml">▸ Проверьте себя</span><h3 style="font-size:46px;line-height:1.08">Один вопрос, который зал задаст себе сам</h3><p>И как понять ответ</p></div>
+    <aside class="notes"><p>Чек-лист слева, справа — жёлтая ячейка с одним вопросом.</p></aside>
+  </section>
+
+  <!-- 16 · Финал -->
+  <section class="slide" data-act="Финал" data-time="1:15">
+    <div class="mosaic auto" data-cols="16" data-rows="5" data-fill=".75" data-hit="39" style="left:160px;top:180px;width:1600px;height:500px;grid-template-columns:repeat(16,1fr)"></div>
+    <span class="x" style="left:160px;top:180px"></span><span class="x" style="left:1760px;top:180px"></span><span class="x" style="left:160px;top:680px"></span><span class="x" style="left:1760px;top:680px"></span>
+    <h2 class="t t-l abs pull" style="left:150px;top:760px;width:1640px;--d:2.4s">Что делаем <mark>дальше</mark></h2>
+    <aside class="notes"><p>Финал: мозаика гаснет до одной ячейки, заголовок проявляется из размытия.</p></aside>
+  </section>
+</div>
+
+<div class="nav"><button id="prev" aria-label="Назад">‹</button><button id="next" aria-label="Вперёд">›</button></div>
+<div class="help" id="help">
+  <h4>Управление</h4>
+  <dl>
+    <dt>→ · пробел</dt><dd>дальше (сначала шаги на слайде)</dd>
+    <dt>←</dt><dd>назад</dd>
+    <dt>F</dt><dd>полный экран</dd>
+    <dt>N</dt><dd>окно заметок спикера с таймером</dd>
+    <dt>A</dt><dd>следующий цвет акцента</dd>
+    <dt>цифры + Enter</dt><dd>перейти к слайду</dd>
+    <dt>H · ?</dt><dd>эта подсказка</dd>
+  </dl>
+</div>
+
+<script>
+/* Мозаика: часть ячеек закрашена цветами темы; ячейка data-hit — та, что останется */
+document.querySelectorAll('.mosaic').forEach((m, mi) => {
+  const cols = +m.dataset.cols, rows = +m.dataset.rows, fill = +m.dataset.fill, hit = +m.dataset.hit;
+  const pal = ['var(--v)', 'var(--lav)', 'var(--lav-2)', 'var(--v)', 'var(--lav)', 'var(--ink)', 'var(--lav-2)', 'var(--y)'];
+  let seed = 11 + mi * 97; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let k = 0; k < cols * rows; k++) {
+    const i = document.createElement('i');
+    if (k === hit) i.className = 'hit';
+    else if (rnd() < fill) i.style.setProperty('--c', pal[Math.floor(rnd() * pal.length)]);
+    i.style.setProperty('--dl', (rnd() * .9).toFixed(2) + 's');
+    m.appendChild(i);
+  }
+});
+</script>
+<script src="engine.js"></script>
+</body>
+</html>

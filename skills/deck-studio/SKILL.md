@@ -24,7 +24,7 @@ metadata:
 | Тексты | `references/copy-rules.md` | Этап 3: сюжетная дуга, правила заголовков, вычитка агентом |
 | Макеты | `references/layouts.md` | Этап 4: каталог 20 макетов, координаты, рецепты |
 | Частицы | `references/particles.md` | Этап 4: формации, фигуры, свои метафоры через `DECK_SHAPES` |
-| Тема | `references/themes.md` | Когда выбрано направление: светлая / тёмная, акценты, цвет бренда, токены, шрифты |
+| Тема | `references/themes.md` | Когда выбрано направление: светлая / тёмная, акценты, цвет бренда, токены, шрифты, стиль «Сетка» |
 | Проверка | `references/gotchas.md` | Перед первым скриншотом и перед сдачей |
 
 ## Путь за семь шагов
@@ -36,6 +36,7 @@ metadata:
    ```
    python3 <skill>/scripts/new_deck.py ./presentation --title "Название" --minutes 20 --theme dark --accent terracotta
    ```
+   Корпоративная, аккуратная дека без частиц — `--style grid` («Сетка»: светлая бумага, видимая сетка, моно-подписи, мозаика и стрелки-векторы вместо поля частиц; 16 макетов в `assets/styles/grid/deck.html`, описание — в конце `themes.md`).
    В `presentation/src/deck.html` лежит каталог из 20 рабочих макетов: оставь нужные, перепиши тексты, цифры вынеси в `DECK_DATA`. Тема и акцент — атрибуты `<html>` (`data-theme="dark|light"`, `data-accent="terracotta|blue|violet|green|amber|rose|mono"`), цвет бренда — `--accent` в `<style>`. Затем `python3 presentation/src/build.py` → `presentation/index.html`.
 5. **Проверка.**
    ```
